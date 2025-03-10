@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:produck_workshop/screen/start_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,7 +15,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'ProDuck'),
+      home: startScreenGenerator(),
     );
   }
 }
