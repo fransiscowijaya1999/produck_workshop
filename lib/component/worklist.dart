@@ -64,22 +64,27 @@ class WorklistTile extends StatelessWidget {
           alignment: Alignment.topLeft
         ),
         onPressed: onSelected,
-        child: RichText(
-          text: TextSpan(
-            style: DefaultTextStyle.of(context).style,
-            children: <TextSpan>[
-              TextSpan(text: label, style: TextStyle(fontSize: 20)),
-              TextSpan(text: '\n'),
-              TextSpan(text: 'Honda KPH', style: TextStyle(fontSize: 10, color: Colors.grey)),
-              TextSpan(text: '\n'),
-              TextSpan(text: 'Rp10,000', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black54))
-            ]
-          )
+        child: Padding(
+          padding: const EdgeInsets.only(top: 5, bottom: 15, left: 5, right: 5),
+          child: RichText(
+            text: TextSpan(
+              style: DefaultTextStyle.of(context).style,
+              children: <TextSpan>[
+                TextSpan(text: label, style: TextStyle(fontSize: 20)),
+                TextSpan(text: '\n'),
+                TextSpan(text: 'Honda KPH', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                TextSpan(text: '\n'),
+                TextSpan(text: 'Rp10,000', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black54))
+              ]
+            )
+          ),
         ),
       ),
       contentPadding: EdgeInsets.all(0),
+      minVerticalPadding: 0,
+      horizontalTitleGap: 5,
       selected: isSelected,
-      selectedTileColor: Colors.black12,
+      selectedTileColor: Colors.black.withAlpha(15),
       trailing: TextButton.icon(
         onPressed: () {},
         label: Icon(Icons.star_border),
