@@ -14,6 +14,10 @@ class MenuBottom extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextButton(
+            onPressed: () {},
+            child: Icon(Icons.history),
+          ),
+          TextButton(
             onPressed: () {
               Navigator.push(
                 context,

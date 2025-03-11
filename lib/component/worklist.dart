@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:produck_workshop/model/project.dart';
 
 class WorklistDestination {
   WorklistDestination({
-    required this.label,
-    this.isPinned = false
+    required this.project
   });
 
-  final String label;
-  final bool isPinned;
+  final Project project;
 }
 
 class Worklist extends StatelessWidget {
@@ -33,7 +32,7 @@ class Worklist extends StatelessWidget {
           itemCount: worklist.length,
           itemBuilder: (_, index) {
             return WorklistTile(
-              label: worklist[index].label,
+              project: worklist[index].project,
               onSelected: onSelected != null ? () => onSelected!(index) : null,
               isSelected: selectedIndex == index,
             );  
@@ -46,13 +45,13 @@ class Worklist extends StatelessWidget {
 class WorklistTile extends StatelessWidget {
   const WorklistTile({
     super.key,
+    required this.project,
     this.onSelected,
-    this.label = '',
     this.isSelected = false
   });
 
   final VoidCallback? onSelected;
-  final String label;
+  final Project project;
   final bool isSelected;
 
   @override
@@ -65,15 +64,17 @@ class WorklistTile extends StatelessWidget {
         ),
         onPressed: onSelected,
         child: Padding(
-          padding: const EdgeInsets.only(top: 5, bottom: 15, left: 5, right: 5),
+          padding: const EdgeInsets.only(top: 5, bottom: 10, left: 5, right: 5),
           child: RichText(
             text: TextSpan(
               style: DefaultTextStyle.of(context).style,
               children: <TextSpan>[
-                TextSpan(text: label, style: TextStyle(fontSize: 20)),
+                TextSpan(text: project.label, style: TextStyle(fontSize: 20)),
                 TextSpan(text: '\n'),
-                TextSpan(text: 'Honda KPH', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                TextSpan(text: '\n'),
+                if (project.vehicle.isNotEmpty) ...[
+                  TextSpan(text: project.vehicle, style: TextStyle(fontSize: 10, color: Colors.grey)),
+                  TextSpan(text: '\n')
+                ],
                 TextSpan(text: 'Rp10,000', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black54))
               ]
             )
@@ -87,7 +88,7 @@ class WorklistTile extends StatelessWidget {
       selectedTileColor: Colors.black.withAlpha(15),
       trailing: TextButton.icon(
         onPressed: () {},
-        label: Icon(Icons.star_border),
+        label: project.isPinned ? Icon(Icons.star) : Icon(Icons.star_border),
       ),
     );
   }
