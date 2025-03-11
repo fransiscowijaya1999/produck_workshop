@@ -11,29 +11,35 @@ class ApiSettingScreen extends StatelessWidget {
     final Future<String?> apiUrl = prefs.getString(prefsApi['API_URL']!);
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text('API Setting'),
+      ),
       body: Center(
-        child: FutureBuilder<String?>(
-          future: apiUrl,
-          builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
-            switch (snapshot.connectionState) {
-              case ConnectionState.none:
-              case ConnectionState.waiting:
-                return const CircularProgressIndicator();
-              case ConnectionState.active:
-              case ConnectionState.done:
-                if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else {
-                  if (snapshot.data != null) {
-                    return ApiSettingForm(
-                      apiUrl: snapshot.data!,
-                    );
+        child: SizedBox(
+          width: 300,
+          child: FutureBuilder<String?>(
+            future: apiUrl,
+            builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
+              switch (snapshot.connectionState) {
+                case ConnectionState.none:
+                case ConnectionState.waiting:
+                  return const CircularProgressIndicator();
+                case ConnectionState.active:
+                case ConnectionState.done:
+                  if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
                   } else {
-                    return const ApiSettingForm();
+                    if (snapshot.data != null) {
+                      return ApiSettingForm(
+                        apiUrl: snapshot.data!,
+                      );
+                    } else {
+                      return const ApiSettingForm();
+                    }
                   }
-                }
+              }
             }
-          }
+          ),
         )
       ),
     );
@@ -86,8 +92,14 @@ class _ApiSettingFormState extends State<ApiSettingForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      TextField(controller: apiUrlController,),
+    return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+      TextField(
+        controller: apiUrlController,
+        decoration: InputDecoration(
+          labelText: 'API Endpoint'
+        ),
+      ),
+      SizedBox(height: 10,),
       ElevatedButton(
         onPressed: isSaving ? null : saveSetting,
         child: isSaving ? const CircularProgressIndicator() : Text('Save')

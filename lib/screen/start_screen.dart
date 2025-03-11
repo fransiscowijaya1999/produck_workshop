@@ -3,15 +3,25 @@ import 'package:produck_workshop/prefs.dart';
 import 'package:produck_workshop/screen/api_setting_screen.dart';
 import 'package:produck_workshop/screen/full_loading_screen.dart';
 import 'package:produck_workshop/screen/login_screen.dart';
+import 'package:produck_workshop/screen/worklist_layout.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Widget startScreenGenerator() {
+Future<Map<String, String>> getStartupPrefs() async {
   final SharedPreferencesAsync prefs = SharedPreferencesAsync();
-  final Future<String?> apiUrl = prefs.getString(prefsApi['API_URL']!);
+  final String apiUrl = await prefs.getString(prefsApi['API_URL']!) ?? '';
+  final String apiToken = await prefs.getString(prefsApi['API_TOKEN']!) ?? '';
 
-  return FutureBuilder<String?>(
-    future: apiUrl,
-    builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
+  return {
+    'API_URL': apiUrl,
+    'API_TOKEN': apiToken
+  };
+}
+
+Widget startScreenGenerator() {
+
+  return FutureBuilder<Map<String, String>>(
+    future: getStartupPrefs(),
+    builder: (BuildContext context, AsyncSnapshot<Map<String, String>> snapshot) {
       switch (snapshot.connectionState) {
         case ConnectionState.none:
         case ConnectionState.waiting:
@@ -21,10 +31,12 @@ Widget startScreenGenerator() {
           if (snapshot.hasError) {
             return StartScreen(message: 'Error: ${snapshot.error}');
           } else {
-            if (snapshot.data != null) {
-              return LoginScreen();
+            if (snapshot.data!['API_URL']!.isEmpty) {
+              return const ApiSettingScreen();
+            } else if (snapshot.data!['API_TOKEN']!.isEmpty) {
+              return const LoginScreen();
             } else {
-              return ApiSettingScreen();
+              return const WorklistLayout();
             }
           }
       }
