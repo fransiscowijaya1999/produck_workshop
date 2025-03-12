@@ -3,7 +3,7 @@ import 'package:produck_workshop/model/project.dart';
 
 class WorklistDestination {
   WorklistDestination({
-    required this.project
+    required this.project,
   });
 
   final Project project;
@@ -14,30 +14,37 @@ class Worklist extends StatelessWidget {
     super.key,
     this.worklist = const [],
     this.selectedIndex,
-    this.onSelected
+    this.onSelected,
+    this.onCreate
   });
 
   final List<WorklistDestination> worklist;
   final int? selectedIndex;
   final ValueSetter<int>? onSelected;
+  final VoidCallback? onCreate;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: 250,
-      child:
-        worklist.isEmpty ?
-        Center(child: Text('No worklist yet.'),) :
-        ListView.builder(
-          itemCount: worklist.length,
-          itemBuilder: (_, index) {
-            return WorklistTile(
-              project: worklist[index].project,
-              onSelected: onSelected != null ? () => onSelected!(index) : null,
-              isSelected: selectedIndex == index,
-            );  
+      child: ListView.builder(
+        itemCount: worklist.length + 1,
+        itemBuilder: (_, index) {
+          if (index == worklist.length) {
+            return ListTile(
+              title: Icon(Icons.add),
+              onTap: onCreate,
+              selected: selectedIndex == worklist.length + 1,
+              selectedTileColor: Colors.black.withAlpha(15),
+            );
           }
-        ),
+          return WorklistTile(
+            project: worklist[index].project,
+            onSelected: onSelected != null ? () => onSelected!(index) : null,
+            isSelected: selectedIndex == index,
+          );
+        }
+      ),
     );
   }
 }

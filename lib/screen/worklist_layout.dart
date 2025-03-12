@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:produck_workshop/component/menu_bottom.dart';
 import 'package:produck_workshop/component/worklist.dart';
-import 'package:produck_workshop/model/project.dart';
+import 'package:produck_workshop/screen/project_create_screen.dart';
 
 class WorklistLayout extends StatefulWidget {
   const WorklistLayout({super.key});
@@ -11,16 +11,10 @@ class WorklistLayout extends StatefulWidget {
 }
 
 class _WorklistLayoutState extends State<WorklistLayout> {
-  List<WorklistDestination> worklistDestinations = [
-    WorklistDestination(project: Project(label: 'squidward')),
-    WorklistDestination(project: Project(label: 'bob', isPinned: true, vehicle: 'honda revo absolute')),
-    WorklistDestination(project: Project(label: 'crab', isPinned: false)),
-    WorklistDestination(project: Project(label: 'plankton', isPinned: true, vehicle: 'yamaha vixion')),
-    WorklistDestination(project: Project(label: 'larry', isPinned: false, vehicle: 'honda cb150 verza')),
-    WorklistDestination(project: Project(label: 'garry', isPinned: false)),
-  ];
+  List<WorklistDestination> worklistDestinations = [];
 
   int? _selectedIndex;
+  bool _isCreation = false;
 
   @override
   void initState() {
@@ -47,6 +41,12 @@ class _WorklistLayoutState extends State<WorklistLayout> {
                     worklist: worklistDestinations,
                     onSelected: onSelected,
                     selectedIndex: _selectedIndex,
+                    onCreate: () {
+                      setState(() {
+                        _isCreation = true;
+                        _selectedIndex = worklistDestinations.length + 1;
+                      });
+                    },
                   ),
                 ),
                 const Divider(),
@@ -57,7 +57,10 @@ class _WorklistLayoutState extends State<WorklistLayout> {
           Expanded(
             child: Container(
               color: Theme.of(context).colorScheme.primaryContainer,
-              child: GeneratorWork(),
+              child: _isCreation ? const ProjectCreateScreen() : GeneratorWork(
+                index: _selectedIndex,
+                worklistDestinations: worklistDestinations,
+              ),
             ),
           )
         ],
@@ -67,10 +70,20 @@ class _WorklistLayoutState extends State<WorklistLayout> {
 }
 
 class GeneratorWork extends StatelessWidget {
-  const GeneratorWork({super.key});
+  const GeneratorWork({
+    super.key,
+    required this.index,
+    required this.worklistDestinations
+  });
+
+  final int? index;
+  final List<WorklistDestination> worklistDestinations;
 
   @override
   Widget build(BuildContext context) {
-    return Center(child: Text('Welcome to ProDuck Workshop'),);
+    if (index == null) {
+      return Center(child: Text('Welcome to ProDuck Workshop'),);
+    }
+    return Center(child: Text('$index'),);
   }
 }
