@@ -75,12 +75,7 @@ int _projectEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
-  {
-    final value = object.label;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
+  bytesCount += 3 + object.label.length * 3;
   bytesCount += 3 + object.orders.length * 3;
   {
     final offsets = allOffsets[Order]!;
@@ -97,12 +92,7 @@ int _projectEstimateSize(
       bytesCount += PaymentSchema.estimateSize(value, offsets, allOffsets);
     }
   }
-  {
-    final value = object.vehicle;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
+  bytesCount += 3 + object.vehicle.length * 3;
   return bytesCount;
 }
 
@@ -142,7 +132,7 @@ Project _projectDeserialize(
   object.id = id;
   object.isPinned = reader.readBool(offsets[1]);
   object.isUploaded = reader.readBool(offsets[2]);
-  object.label = reader.readStringOrNull(offsets[3]);
+  object.label = reader.readString(offsets[3]);
   object.orders = reader.readObjectList<Order>(
         offsets[4],
         OrderSchema.deserialize,
@@ -157,7 +147,7 @@ Project _projectDeserialize(
         Payment(),
       ) ??
       [];
-  object.vehicle = reader.readStringOrNull(offsets[6]);
+  object.vehicle = reader.readString(offsets[6]);
   return object;
 }
 
@@ -175,7 +165,7 @@ P _projectDeserializeProp<P>(
     case 2:
       return (reader.readBool(offset)) as P;
     case 3:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 4:
       return (reader.readObjectList<Order>(
             offset,
@@ -193,7 +183,7 @@ P _projectDeserializeProp<P>(
           ) ??
           []) as P;
     case 6:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -413,24 +403,8 @@ extension ProjectQueryFilter
     });
   }
 
-  QueryBuilder<Project, Project, QAfterFilterCondition> labelIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'label',
-      ));
-    });
-  }
-
-  QueryBuilder<Project, Project, QAfterFilterCondition> labelIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'label',
-      ));
-    });
-  }
-
   QueryBuilder<Project, Project, QAfterFilterCondition> labelEqualTo(
-    String? value, {
+    String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -443,7 +417,7 @@ extension ProjectQueryFilter
   }
 
   QueryBuilder<Project, Project, QAfterFilterCondition> labelGreaterThan(
-    String? value, {
+    String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -458,7 +432,7 @@ extension ProjectQueryFilter
   }
 
   QueryBuilder<Project, Project, QAfterFilterCondition> labelLessThan(
-    String? value, {
+    String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -473,8 +447,8 @@ extension ProjectQueryFilter
   }
 
   QueryBuilder<Project, Project, QAfterFilterCondition> labelBetween(
-    String? lower,
-    String? upper, {
+    String lower,
+    String upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -728,24 +702,8 @@ extension ProjectQueryFilter
     });
   }
 
-  QueryBuilder<Project, Project, QAfterFilterCondition> vehicleIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'vehicle',
-      ));
-    });
-  }
-
-  QueryBuilder<Project, Project, QAfterFilterCondition> vehicleIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'vehicle',
-      ));
-    });
-  }
-
   QueryBuilder<Project, Project, QAfterFilterCondition> vehicleEqualTo(
-    String? value, {
+    String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -758,7 +716,7 @@ extension ProjectQueryFilter
   }
 
   QueryBuilder<Project, Project, QAfterFilterCondition> vehicleGreaterThan(
-    String? value, {
+    String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -773,7 +731,7 @@ extension ProjectQueryFilter
   }
 
   QueryBuilder<Project, Project, QAfterFilterCondition> vehicleLessThan(
-    String? value, {
+    String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -788,8 +746,8 @@ extension ProjectQueryFilter
   }
 
   QueryBuilder<Project, Project, QAfterFilterCondition> vehicleBetween(
-    String? lower,
-    String? upper, {
+    String lower,
+    String upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -1093,7 +1051,7 @@ extension ProjectQueryProperty
     });
   }
 
-  QueryBuilder<Project, String?, QQueryOperations> labelProperty() {
+  QueryBuilder<Project, String, QQueryOperations> labelProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'label');
     });
@@ -1111,7 +1069,7 @@ extension ProjectQueryProperty
     });
   }
 
-  QueryBuilder<Project, String?, QQueryOperations> vehicleProperty() {
+  QueryBuilder<Project, String, QQueryOperations> vehicleProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'vehicle');
     });

@@ -7,8 +7,8 @@ part 'project.g.dart';
 @collection
 class Project {
   Id id = Isar.autoIncrement;
-  String? label;
-  String? vehicle;
+  String label = '';
+  String vehicle = '';
   bool isPinned = false;
   bool isUploaded = false;
   late DateTime date;

@@ -5,7 +5,7 @@ part 'order.g.dart';
 @embedded
 class Order {
   bool isGroup = false;
-  String? description;
+  String description = '';
   int? productId;
   int qty = 0;
   float price = 0;

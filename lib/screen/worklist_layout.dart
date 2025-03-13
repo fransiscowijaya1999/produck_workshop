@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:isar/isar.dart';
 import 'package:produck_workshop/component/menu_bottom.dart';
 import 'package:produck_workshop/component/worklist.dart';
-import 'package:produck_workshop/screen/project_create_screen.dart';
+import 'package:produck_workshop/db.dart';
+import 'package:produck_workshop/screen/project_screen.dart';
+
+import '../schema/project.dart';
 
 class WorklistLayout extends StatefulWidget {
   const WorklistLayout({super.key});
@@ -11,20 +15,58 @@ class WorklistLayout extends StatefulWidget {
 }
 
 class _WorklistLayoutState extends State<WorklistLayout> {
-  List<WorklistDestination> worklistDestinations = [];
+  List<Project> _projects = [];
 
   int? _selectedIndex;
-  bool _isCreation = false;
+  int? _createdId;
 
   @override
   void initState() {
     super.initState();
-    worklistDestinations.sort((a, b) => (a.project.isPinned == b.project.isPinned ? 0 : (a.project.isPinned ? -1 : 1)));
+    createWatcher();
+  }
+
+  void createWatcher() {
+    final db = DatabaseService.db;
+
+    Query<Project> projectsQuery = db.projects.where()
+      .filter()
+      .isUploadedEqualTo(false)
+      .build();
+
+    Stream<List<Project>> queryChanged = projectsQuery.watch(fireImmediately: true);
+    queryChanged.listen((projects) {
+      setState(() {
+        _projects = projects;
+        if (_createdId != null) {
+          final projectFiltered = _projects.where((p) => p.id == _createdId).toList();
+          final newIndex = _projects.indexOf(projectFiltered[0]);
+
+          _selectedIndex = newIndex;
+          _createdId = null;
+        }
+      });
+
+    });
   }
 
   void onSelected(int index) {
     setState(() {
-      _selectedIndex = index;
+      _selectedIndex = index; 
+    });
+  }
+
+  Future<void> onCreate() async {
+    final db = DatabaseService.db;
+    final newProject = Project()
+      ..date = DateTime.now();
+
+    await db.writeTxn(() async {
+      await db.projects.put(newProject);
+    });
+
+    setState(() {
+      _createdId = newProject.id;
     });
   }
 
@@ -38,16 +80,11 @@ class _WorklistLayoutState extends State<WorklistLayout> {
               children: [
                 Expanded(
                   child: Worklist(
-                    worklist: worklistDestinations,
+                    worklist: _projects,
                     onSelected: onSelected,
                     selectedIndex: _selectedIndex,
-                    onCreate: () {
-                      setState(() {
-                        _isCreation = true;
-                        _selectedIndex = worklistDestinations.length + 1;
-                      });
-                    },
-                  ),
+                    onCreate: onCreate,
+                  )
                 ),
                 const Divider(),
                 const MenuBottom()
@@ -57,9 +94,15 @@ class _WorklistLayoutState extends State<WorklistLayout> {
           Expanded(
             child: Container(
               color: Theme.of(context).colorScheme.primaryContainer,
-              child: _isCreation ? const ProjectCreateScreen() : GeneratorWork(
-                index: _selectedIndex,
-                worklistDestinations: worklistDestinations,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: GeneratorWork(
+                      index: _selectedIndex,
+                      worklistDestinations: _projects,
+                    ),
+                  )
+                ],
               ),
             ),
           )
@@ -77,13 +120,13 @@ class GeneratorWork extends StatelessWidget {
   });
 
   final int? index;
-  final List<WorklistDestination> worklistDestinations;
+  final List<Project> worklistDestinations;
 
   @override
   Widget build(BuildContext context) {
     if (index == null) {
       return Center(child: Text('Welcome to ProDuck Workshop'),);
     }
-    return Center(child: Text('$index'),);
+    return ProjectScreen(project: worklistDestinations[index!]);
   }
 }

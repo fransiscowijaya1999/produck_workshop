@@ -67,12 +67,7 @@ int _orderEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
-  {
-    final value = object.description;
-    if (value != null) {
-      bytesCount += 3 + value.length * 3;
-    }
-  }
+  bytesCount += 3 + object.description.length * 3;
   {
     final list = object.orders;
     if (list != null) {
@@ -118,7 +113,7 @@ Order _orderDeserialize(
 ) {
   final object = Order();
   object.cost = reader.readFloat(offsets[0]);
-  object.description = reader.readStringOrNull(offsets[1]);
+  object.description = reader.readString(offsets[1]);
   object.isBroker = reader.readBool(offsets[2]);
   object.isGroup = reader.readBool(offsets[3]);
   object.orders = reader.readObjectList<Order>(
@@ -143,7 +138,7 @@ P _orderDeserializeProp<P>(
     case 0:
       return (reader.readFloat(offset)) as P;
     case 1:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 2:
       return (reader.readBool(offset)) as P;
     case 3:
@@ -229,24 +224,8 @@ extension OrderQueryFilter on QueryBuilder<Order, Order, QFilterCondition> {
     });
   }
 
-  QueryBuilder<Order, Order, QAfterFilterCondition> descriptionIsNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNull(
-        property: r'description',
-      ));
-    });
-  }
-
-  QueryBuilder<Order, Order, QAfterFilterCondition> descriptionIsNotNull() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(const FilterCondition.isNotNull(
-        property: r'description',
-      ));
-    });
-  }
-
   QueryBuilder<Order, Order, QAfterFilterCondition> descriptionEqualTo(
-    String? value, {
+    String value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -259,7 +238,7 @@ extension OrderQueryFilter on QueryBuilder<Order, Order, QFilterCondition> {
   }
 
   QueryBuilder<Order, Order, QAfterFilterCondition> descriptionGreaterThan(
-    String? value, {
+    String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -274,7 +253,7 @@ extension OrderQueryFilter on QueryBuilder<Order, Order, QFilterCondition> {
   }
 
   QueryBuilder<Order, Order, QAfterFilterCondition> descriptionLessThan(
-    String? value, {
+    String value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -289,8 +268,8 @@ extension OrderQueryFilter on QueryBuilder<Order, Order, QFilterCondition> {
   }
 
   QueryBuilder<Order, Order, QAfterFilterCondition> descriptionBetween(
-    String? lower,
-    String? upper, {
+    String lower,
+    String upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,

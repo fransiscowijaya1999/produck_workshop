@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:produck_workshop/model/project.dart';
+import 'package:produck_workshop/schema/project.dart';
 
 class WorklistDestination {
   WorklistDestination({
@@ -18,7 +18,7 @@ class Worklist extends StatelessWidget {
     this.onCreate
   });
 
-  final List<WorklistDestination> worklist;
+  final List<Project> worklist;
   final int? selectedIndex;
   final ValueSetter<int>? onSelected;
   final VoidCallback? onCreate;
@@ -33,13 +33,11 @@ class Worklist extends StatelessWidget {
           if (index == worklist.length) {
             return ListTile(
               title: Icon(Icons.add),
-              onTap: onCreate,
-              selected: selectedIndex == worklist.length + 1,
-              selectedTileColor: Colors.black.withAlpha(15),
+              onTap: onCreate
             );
           }
           return WorklistTile(
-            project: worklist[index].project,
+            project: worklist[index],
             onSelected: onSelected != null ? () => onSelected!(index) : null,
             isSelected: selectedIndex == index,
           );
@@ -76,7 +74,7 @@ class WorklistTile extends StatelessWidget {
             text: TextSpan(
               style: DefaultTextStyle.of(context).style,
               children: <TextSpan>[
-                TextSpan(text: project.label, style: TextStyle(fontSize: 20)),
+                TextSpan(text: project.label.isEmpty ? 'Unlabelled' : project.label, style: TextStyle(fontSize: 20)),
                 TextSpan(text: '\n'),
                 if (project.vehicle.isNotEmpty) ...[
                   TextSpan(text: project.vehicle, style: TextStyle(fontSize: 10, color: Colors.grey)),
