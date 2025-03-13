@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 import 'package:produck_workshop/component/menu_bottom.dart';
@@ -15,15 +17,23 @@ class WorklistLayout extends StatefulWidget {
 }
 
 class _WorklistLayoutState extends State<WorklistLayout> {
-  List<Project> _projects = [];
+  late Future<List<Project>> projectsFuture;
+  late StreamSubscription<List<Project>> _projectsStream;
 
   int? _selectedIndex;
-  int? _createdId;
+  int? _currentProjectId;
 
   @override
   void initState() {
     super.initState();
+
     createWatcher();
+  }
+
+  @override
+  void dispose() {
+    _projectsStream.cancel();
+    super.dispose();
   }
 
   void createWatcher() {
@@ -33,26 +43,23 @@ class _WorklistLayoutState extends State<WorklistLayout> {
       .filter()
       .isUploadedEqualTo(false)
       .build();
+    
+    setState(() {
+      projectsFuture = projectsQuery.findAll();
+    });
 
-    Stream<List<Project>> queryChanged = projectsQuery.watch(fireImmediately: true);
-    queryChanged.listen((projects) {
+    Stream<List<Project>> queryChanged = projectsQuery.watch();
+    _projectsStream = queryChanged.listen((projects) {
       setState(() {
-        _projects = projects;
-        if (_createdId != null) {
-          final projectFiltered = _projects.where((p) => p.id == _createdId).toList();
-          final newIndex = _projects.indexOf(projectFiltered[0]);
-
-          _selectedIndex = newIndex;
-          _createdId = null;
-        }
+        projectsFuture = projectsQuery.findAll();
       });
-
     });
   }
 
-  void onSelected(int index) {
+  void onSelected(int index, int projectId) {
     setState(() {
-      _selectedIndex = index; 
+      _selectedIndex = index;
+      _currentProjectId = projectId;
     });
   }
 
@@ -63,10 +70,6 @@ class _WorklistLayoutState extends State<WorklistLayout> {
 
     await db.writeTxn(() async {
       await db.projects.put(newProject);
-    });
-
-    setState(() {
-      _createdId = newProject.id;
     });
   }
 
@@ -79,11 +82,32 @@ class _WorklistLayoutState extends State<WorklistLayout> {
             child: Column(
               children: [
                 Expanded(
-                  child: Worklist(
-                    worklist: _projects,
-                    onSelected: onSelected,
-                    selectedIndex: _selectedIndex,
-                    onCreate: onCreate,
+                  child: FutureBuilder<List<Project>>(
+                    future: projectsFuture,
+                    builder: (BuildContext context, AsyncSnapshot<List<Project>> snapshot) {
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.none:
+                        case ConnectionState.waiting:
+                        case ConnectionState.active:
+                        case ConnectionState.done:
+                          if (snapshot.hasError) {
+                            return Center(child: Text('Error: ${snapshot.error}'));
+                          } else {
+                            if (snapshot.data != null) {
+                              final projects = snapshot.data!;
+
+                              return Worklist(
+                                worklist: projects,
+                                onSelected: (index) => onSelected(index, projects[index].id),
+                                selectedIndex: _selectedIndex,
+                                onCreate: onCreate,
+                              );
+                            } else {
+                              return Center(child: Text('Projects is null'));
+                            }
+                          }
+                      }
+                    }
                   )
                 ),
                 const Divider(),
@@ -98,8 +122,13 @@ class _WorklistLayoutState extends State<WorklistLayout> {
                 children: [
                   Expanded(
                     child: GeneratorWork(
-                      index: _selectedIndex,
-                      worklistDestinations: _projects,
+                      projectId: _currentProjectId,
+                      onDeleted: () {
+                        setState(() {
+                          _selectedIndex = null;
+                          _currentProjectId = null;
+                        });
+                      },
                     ),
                   )
                 ],
@@ -115,18 +144,23 @@ class _WorklistLayoutState extends State<WorklistLayout> {
 class GeneratorWork extends StatelessWidget {
   const GeneratorWork({
     super.key,
-    required this.index,
-    required this.worklistDestinations
+    required this.projectId,
+    this.onDeleted
   });
 
-  final int? index;
-  final List<Project> worklistDestinations;
+  final int? projectId;
+  final VoidCallback? onDeleted;
 
   @override
   Widget build(BuildContext context) {
-    if (index == null) {
-      return Center(child: Text('Welcome to ProDuck Workshop'),);
+    if (projectId == null) {
+      return Center(child: Text('Select or create a Project.'),);
+    } else {
+      // return Center(child: Text('$projectId'));
+      return ProjectScreen(
+        projectId: projectId!,
+        onDeleted: onDeleted,
+      );
     }
-    return ProjectScreen(project: worklistDestinations[index!]);
   }
 }

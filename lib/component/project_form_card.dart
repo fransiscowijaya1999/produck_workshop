@@ -8,13 +8,17 @@ class ProjectFormCard extends StatefulWidget {
     this.label = '',
     this.vehicle = '',
     this.date = '',
-    this.onSave
+    this.onSave,
+    this.onDelete,
+    this.isSaving = false,
   });
 
   final String label;
   final String vehicle;
   final String date;
   final SaveCallback? onSave;
+  final VoidCallback? onDelete;
+  final bool isSaving;
 
   @override
   State<ProjectFormCard> createState() => _ProjectFormCardState();
@@ -88,8 +92,27 @@ class _ProjectFormCardState extends State<ProjectFormCard> {
                 )
               ],
             ),
-            SizedBox(height: 10,),
-            ElevatedButton(onPressed: widget.onSave != null ? () { widget.onSave!(labelController.text, vehicleController.text, dateController.text); } : null, child: Text('Save'))
+            Divider(
+              height: 30,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ElevatedButton(
+                  onPressed: widget.onSave != null && !widget.isSaving ? () { widget.onSave!(labelController.text, vehicleController.text, dateController.text); } : null,
+                  child: widget.isSaving ? const SizedBox(height: 5, child: CircularProgressIndicator()) : const Text('Save')
+                ),
+                ElevatedButton(
+                  onPressed: widget.onDelete != null ? () { widget.onDelete!(); } : null,
+                  style: ElevatedButton.styleFrom(
+                    iconColor: Colors.white,
+                    backgroundColor: Colors.red
+                  ),
+                  child: const Icon(Icons.delete),
+                ),
+              ],
+            )
           ],
         ),
       ),
