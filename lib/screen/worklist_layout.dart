@@ -17,10 +17,11 @@ class WorklistLayout extends StatefulWidget {
 }
 
 class _WorklistLayoutState extends State<WorklistLayout> {
+  final db = DatabaseService.db;
+
   late Future<List<Project>> projectsFuture;
   late StreamSubscription<List<Project>> _projectsStream;
 
-  int? _selectedIndex;
   int? _currentProjectId;
 
   @override
@@ -37,11 +38,10 @@ class _WorklistLayoutState extends State<WorklistLayout> {
   }
 
   void createWatcher() {
-    final db = DatabaseService.db;
-
     Query<Project> projectsQuery = db.projects.where()
       .filter()
       .isUploadedEqualTo(false)
+      .sortByIsPinnedDesc()
       .build();
     
     setState(() {
@@ -58,13 +58,23 @@ class _WorklistLayoutState extends State<WorklistLayout> {
 
   void onSelected(int index, int projectId) {
     setState(() {
-      _selectedIndex = index;
       _currentProjectId = projectId;
     });
   }
 
+  Future<void> onPin(int id) async {
+    await db.writeTxn(() async {
+      final existingProject = await db.projects.get(id);
+
+      if (existingProject != null) {
+        existingProject.isPinned = !existingProject.isPinned;
+
+        await db.projects.put(existingProject);
+      }
+    });
+  }
+
   Future<void> onCreate() async {
-    final db = DatabaseService.db;
     final newProject = Project()
       ..date = DateTime.now();
 
@@ -95,12 +105,16 @@ class _WorklistLayoutState extends State<WorklistLayout> {
                           } else {
                             if (snapshot.data != null) {
                               final projects = snapshot.data!;
+                              final filteredProject = projects.where((p) => p.id == _currentProjectId).toList();
+                              final currentSelectedProject = filteredProject.isNotEmpty ? filteredProject[0] : null;
+                              final projectIndex = currentSelectedProject != null ? projects.indexOf(currentSelectedProject) : null;
 
                               return Worklist(
                                 worklist: projects,
                                 onSelected: (index) => onSelected(index, projects[index].id),
-                                selectedIndex: _selectedIndex,
+                                selectedIndex: projectIndex,
                                 onCreate: onCreate,
+                                onPin: onPin,
                               );
                             } else {
                               return Center(child: Text('Projects is null'));
@@ -125,7 +139,6 @@ class _WorklistLayoutState extends State<WorklistLayout> {
                       projectId: _currentProjectId,
                       onDeleted: () {
                         setState(() {
-                          _selectedIndex = null;
                           _currentProjectId = null;
                         });
                       },

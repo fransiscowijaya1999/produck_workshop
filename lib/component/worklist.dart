@@ -15,13 +15,15 @@ class Worklist extends StatelessWidget {
     this.worklist = const [],
     this.selectedIndex,
     this.onSelected,
-    this.onCreate
+    this.onCreate,
+    this.onPin
   });
 
   final List<Project> worklist;
   final int? selectedIndex;
   final ValueSetter<int>? onSelected;
   final VoidCallback? onCreate;
+  final ValueSetter<int>? onPin;
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +42,7 @@ class Worklist extends StatelessWidget {
             project: worklist[index],
             onSelected: onSelected != null ? () => onSelected!(index) : null,
             isSelected: selectedIndex == index,
+            onPin: onPin != null ? () => onPin!(worklist[index].id) : null
           );
         }
       ),
@@ -52,12 +55,14 @@ class WorklistTile extends StatelessWidget {
     super.key,
     required this.project,
     this.onSelected,
-    this.isSelected = false
+    this.isSelected = false,
+    this.onPin
   });
 
   final VoidCallback? onSelected;
   final Project project;
   final bool isSelected;
+  final VoidCallback? onPin;
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +97,7 @@ class WorklistTile extends StatelessWidget {
       selected: isSelected,
       selectedTileColor: Colors.black.withAlpha(15),
       trailing: TextButton.icon(
-        onPressed: () {},
+        onPressed: onPin,
         label: project.isPinned ? Icon(Icons.star) : Icon(Icons.star_border),
       ),
     );
