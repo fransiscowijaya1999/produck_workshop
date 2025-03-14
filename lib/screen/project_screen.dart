@@ -64,7 +64,6 @@ class _ProjectScreenState extends State<ProjectScreen> {
 
       project.label = label;
       project.vehicle = vehicle;
-      project.date = DateTime.now();
 
       await db.projects.put(project);
     });

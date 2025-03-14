@@ -81,6 +81,10 @@ class _WorklistLayoutState extends State<WorklistLayout> {
     await db.writeTxn(() async {
       await db.projects.put(newProject);
     });
+
+    setState(() {
+      _currentProjectId = newProject.id;
+    });
   }
 
   @override
