@@ -25,16 +25,16 @@ class ProjectFormCard extends StatefulWidget {
 }
 
 class _ProjectFormCardState extends State<ProjectFormCard> {
-  final labelController = TextEditingController();
-  final vehicleController = TextEditingController();
-  final dateController = TextEditingController();
+  late TextEditingController labelController;
+  late TextEditingController vehicleController;
+  late TextEditingController dateController;
 
   @override
   void initState() {
     super.initState();
-    labelController.text = widget.label;
-    vehicleController.text = widget.vehicle;
-    dateController.text = widget.date;
+    labelController = TextEditingController();
+    vehicleController = TextEditingController();
+    dateController = TextEditingController();
   }
 
   @override
@@ -62,13 +62,13 @@ class _ProjectFormCardState extends State<ProjectFormCard> {
                   child: Column(
                     children: [
                       TextField(
-                        controller: labelController,
+                        controller: labelController..text = widget.label,
                         decoration: InputDecoration(
                           labelText: 'Label'
                         ),
                       ),
                       TextField(
-                        controller: vehicleController,
+                        controller: vehicleController..text = widget.vehicle,
                         decoration: InputDecoration(
                           labelText: 'Vehicle'
                         ),
@@ -82,7 +82,7 @@ class _ProjectFormCardState extends State<ProjectFormCard> {
                   child: Column(
                     children: [
                       TextField(
-                        controller: dateController,
+                        controller: dateController..text = widget.date.toString(),
                         decoration: InputDecoration(
                           labelText: 'Date'
                         ),

@@ -156,7 +156,6 @@ class GeneratorWork extends StatelessWidget {
     if (projectId == null) {
       return Center(child: Text('Select or create a Project.'),);
     } else {
-      // return Center(child: Text('$projectId'));
       return ProjectScreen(
         projectId: projectId!,
         onDeleted: onDeleted,

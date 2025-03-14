@@ -43,7 +43,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
 
   void createWatcher(int id) {
     projectFuture = db.projects.get(widget.projectId);
-    
+
     final projectChanged = db.projects.watchObject(id);
     projectStream = projectChanged.listen((project) {
       if (project != null) {
@@ -86,7 +86,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Project?>(
-      future: projectFuture,
+      future: db.projects.get(widget.projectId),
       builder: (BuildContext context, AsyncSnapshot<Project?> snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.none:
@@ -98,7 +98,6 @@ class _ProjectScreenState extends State<ProjectScreen> {
             } else {
               if (snapshot.data != null) {
                 final project = snapshot.data!;
-
                 return SingleChildScrollView(
                   child: Padding(
                     padding: EdgeInsets.all(25),
