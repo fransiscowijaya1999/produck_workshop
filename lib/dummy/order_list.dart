@@ -3,7 +3,7 @@ import 'package:produck_workshop/schema/order.dart';
 final List<Order> dummyOrders = [
   Order()
     ..productId = 1
-    ..description = 'jumbo brake fluid 50 mL'
+    ..description = 'brake fluid 50 mL'
     ..price = 10
     ..qty = 1
     ..cost = 6
@@ -33,4 +33,12 @@ final List<Order> dummyOrders = [
       ..qty = 3
       ..cost = 0.5
     ]
+  ,
+  Order()
+    ..productId = 5
+    ..description = 'clutch weight'
+    ..price = 150
+    ..qty = 1
+    ..cost = 110
+  ,
 ];

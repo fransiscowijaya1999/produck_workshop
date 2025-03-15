@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:produck_workshop/component/order_list.dart';
 import 'package:produck_workshop/schema/order.dart';
 
 class OrderItem extends StatelessWidget {
@@ -15,6 +16,41 @@ class OrderItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (order.isGroup) {
+      return ExpansionTile(
+        controlAffinity: ListTileControlAffinity.leading,
+        minTileHeight: 0,
+        dense: true,
+        childrenPadding: EdgeInsets.all(10),
+        backgroundColor: Colors.black12,
+        collapsedBackgroundColor: Colors.black12,
+        title: Row(
+          children: [
+            SizedBox(
+              width: 50,
+              child: Checkbox(
+                value: isChecked,
+                onChanged: onChecked != null ? (checkStatus) => onChecked!(order) : null
+              ),
+            ),
+            Expanded(
+              flex: 12,
+              child: Text(order.description)
+            ),
+            Expanded(
+              flex: 2,
+              child: Text('Rp Total'),
+            )
+          ],
+        ),
+        children: [
+          OrderList(
+            orders: order.orders ?? [],
+          )
+        ],
+      );
+    }
+
     return ListTile(
       contentPadding: EdgeInsets.all(0),
       minVerticalPadding: 0,
