@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:produck_workshop/component/order_list.dart';
 import 'package:produck_workshop/component/project_form_card.dart';
 import 'package:produck_workshop/db.dart';
+import 'package:produck_workshop/dummy/order_list.dart';
 import 'package:produck_workshop/schema/project.dart';
 
 class ProjectScreen extends StatefulWidget {
@@ -100,13 +102,23 @@ class _ProjectScreenState extends State<ProjectScreen> {
                 return SingleChildScrollView(
                   child: Padding(
                     padding: EdgeInsets.all(25),
-                    child: ProjectFormCard(
-                      label: project.label,
-                      vehicle: project.vehicle,
-                      date: project.date.toString(),
-                      onSave: saveProject,
-                      onDelete: deleteProject,
-                      isSaving: isSaving
+                    child: Column(
+                      children: [
+                        ProjectFormCard(
+                          label: project.label,
+                          vehicle: project.vehicle,
+                          date: project.date.toString(),
+                          onSave: saveProject,
+                          onDelete: deleteProject,
+                          isSaving: isSaving
+                        ),
+                        SizedBox(
+                          height: 10
+                        ),
+                        OrderList(
+                          orders: dummyOrders
+                        )
+                      ],
                     ),
                   ),
                 );
