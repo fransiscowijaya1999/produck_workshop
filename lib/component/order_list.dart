@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:produck_workshop/component/order_item.dart';
+import 'package:produck_workshop/component/order_item_form.dart';
 import 'package:produck_workshop/schema/order.dart';
+
+enum CreateFormState { order, group, off }
 
 class OrderList extends StatefulWidget {
   const OrderList({
@@ -16,6 +19,8 @@ class OrderList extends StatefulWidget {
 
 class _OrderListState extends State<OrderList> {
   final List<Order> _selectedOrder = [];
+  int? currentEditIndex;
+  CreateFormState createFormState = CreateFormState.off;
 
   void onChecked(Order order) {
     if (_selectedOrder.contains(order)) {
@@ -105,6 +110,45 @@ class _OrderListState extends State<OrderList> {
           
             }
           ),
+          Divider(
+            height: 2,
+            thickness: 2,
+          ),
+          createFormState == CreateFormState.off ?
+            Padding(
+              padding: const EdgeInsets.all(5),
+              child: Row(
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        createFormState = CreateFormState.order;
+                      });
+                    },
+                    child: Text('Add product'),
+                  ),
+                  SizedBox(width: 5,),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        createFormState = CreateFormState.group;
+                      });
+                    },
+                    child: Text('Add section'),
+                  )
+                ]
+              ),
+            )
+            :
+            OrderItemForm(
+              formState: createFormState,
+              submitAction: FormSubmitAction.create,
+              onCancel: () {
+                setState(() {
+                  createFormState = CreateFormState.off;
+                });
+              },
+            )
         ],
       ),
     );
