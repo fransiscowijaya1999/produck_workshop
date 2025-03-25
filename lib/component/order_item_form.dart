@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:produck_workshop/component/order_list.dart';
+import 'package:produck_workshop/model/product.dart';
 import 'package:produck_workshop/schema/order.dart';
+import 'package:produck_workshop/services/product.dart';
 
 enum FormSubmitAction { create, update }
 
@@ -31,12 +33,24 @@ class _OrderItemFormState extends State<OrderItemForm> {
   final priceController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
+  late Future<List<Product>> futureProducts;
+
   bool isBroker = false;
+
+  @override
+  void initState() {
+    super.initState();
+    futureProducts = ProductService.filterProductLimited("", 5);
+    productController.addListener(_onSearch);
+  }
 
   @override
   void dispose() {
     productController.dispose();
     descriptionController.dispose();
+    costController.dispose();
+    qtyController.dispose();
+    priceController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
@@ -47,6 +61,12 @@ class _OrderItemFormState extends State<OrderItemForm> {
         if (widget.onCancel != null) { widget.onCancel!(); }
       }
     }
+  }
+
+  void _onSearch() {
+    setState(() {
+      futureProducts = ProductService.filterProductLimited(productController.text, 5);
+    });
   }
 
   TextStyle shrinkStyle() {
@@ -90,15 +110,35 @@ class _OrderItemFormState extends State<OrderItemForm> {
             onKeyEvent: formKeyDownHandler,
             child: Row(
               children: [
-                DropdownMenu<String>(
-                  width: 250,
-                  controller: productController,
-                  label: Text('Product'),
-                  dropdownMenuEntries: [
-                    DropdownMenuEntry(value: 'test', label: 'test'),
-                    DropdownMenuEntry(value: 'hey', label: 'hoho')
-                  ],
+                FutureBuilder<List<Product>>(
+                  future: futureProducts,
+                  builder: (BuildContext context, AsyncSnapshot<List<Product>> snapshot) {
+                    List<DropdownMenuEntry<String>> products = [];
+                    
+                    switch (snapshot.connectionState) {
+                      case ConnectionState.none:
+                      case ConnectionState.waiting:
+                        products = [DropdownMenuEntry(value: 'Loading', label: 'Loading')];
+                      case ConnectionState.active:
+                      case ConnectionState.done:
+                        if (snapshot.hasError) {
+                          products = [DropdownMenuEntry(value: 'Error', label: 'Error')];
+                        } else {
+                          products = snapshot.data!.map((p) {
+                            return DropdownMenuEntry(value: p.name, label: p.name);
+                          }).toList();
+                        }
+                    }
+
+                    return DropdownMenu<String>(
+                      width: 250,
+                      controller: productController,
+                      label: Text('Product'),
+                      dropdownMenuEntries: products
+                    );
+                  }
                 ),
+                
                 SizedBox(width: 10,),
                 Expanded(
                   flex: 3,

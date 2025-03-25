@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:produck_workshop/http/client.dart';
 import 'package:produck_workshop/prefs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -49,6 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final token = decoded['result'];
 
       await prefs.setString(prefsApi['API_TOKEN']!, token);
+      authorizeDio(token);
     } catch (error) {
       final snackBar = SnackBar(content: Text('Error: $error'));
       if (context.mounted) {

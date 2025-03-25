@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:produck_workshop/http/client.dart';
 import 'package:produck_workshop/prefs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -84,6 +85,7 @@ class _ApiSettingFormState extends State<ApiSettingForm> {
     final apiUrl = apiUrlController.text;
 
     await prefs.setString('api_url', apiUrl);
+    configureDio(apiUrl);
 
     setState(() {
       isSaving = false;

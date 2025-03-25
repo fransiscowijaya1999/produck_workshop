@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:produck_workshop/http/client.dart';
 import 'package:produck_workshop/prefs.dart';
 import 'package:produck_workshop/screen/api_setting_screen.dart';
 import 'package:produck_workshop/screen/full_loading_screen.dart';
@@ -10,6 +11,9 @@ Future<Map<String, String>> getStartupPrefs() async {
   final SharedPreferencesAsync prefs = SharedPreferencesAsync();
   final String apiUrl = await prefs.getString(prefsApi['API_URL']!) ?? '';
   final String apiToken = await prefs.getString(prefsApi['API_TOKEN']!) ?? '';
+
+  configureDio(apiUrl);
+  authorizeDio(apiToken);
 
   return {
     'API_URL': apiUrl,
