@@ -35,8 +35,6 @@ class Product {
       products.add(Product.fromJson(product));
     }
 
-    print(products);
-
     return products;
   }
 }

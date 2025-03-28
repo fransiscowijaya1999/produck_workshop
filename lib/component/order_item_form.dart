@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:produck_workshop/component/dropdownmenu_debounced.dart';
 import 'package:produck_workshop/component/order_list.dart';
 import 'package:produck_workshop/model/product.dart';
 import 'package:produck_workshop/schema/order.dart';
@@ -26,7 +27,6 @@ class OrderItemForm extends StatefulWidget {
 }
 
 class _OrderItemFormState extends State<OrderItemForm> {
-  final productController = TextEditingController();
   final descriptionController = TextEditingController();
   final costController = TextEditingController();
   final qtyController = TextEditingController();
@@ -36,17 +36,16 @@ class _OrderItemFormState extends State<OrderItemForm> {
   late Future<List<Product>> futureProducts;
 
   bool isBroker = false;
+  String searchText = '';
 
   @override
   void initState() {
     super.initState();
     futureProducts = ProductService.filterProductLimited("", 5);
-    productController.addListener(_onSearch);
   }
 
   @override
   void dispose() {
-    productController.dispose();
     descriptionController.dispose();
     costController.dispose();
     qtyController.dispose();
@@ -63,9 +62,17 @@ class _OrderItemFormState extends State<OrderItemForm> {
     }
   }
 
-  void _onSearch() {
+  void _onProductSelected(Product product) {
     setState(() {
-      futureProducts = ProductService.filterProductLimited(productController.text, 5);
+      costController.text = product.cost.toString();
+      priceController.text = product.price.toString();
+      qtyController.text = 1.toString();
+    });
+  }
+
+  void _onSearch(String text) {
+    setState(() {
+      futureProducts = ProductService.filterProductLimited(searchText, 5);
     });
   }
 
@@ -113,32 +120,33 @@ class _OrderItemFormState extends State<OrderItemForm> {
                 FutureBuilder<List<Product>>(
                   future: futureProducts,
                   builder: (BuildContext context, AsyncSnapshot<List<Product>> snapshot) {
-                    List<DropdownMenuEntry<String>> products = [];
+                    List<DropdownMenuEntry<Product?>> products = [];
                     
                     switch (snapshot.connectionState) {
                       case ConnectionState.none:
                       case ConnectionState.waiting:
-                        products = [DropdownMenuEntry(value: 'Loading', label: 'Loading')];
+                          products = [DropdownMenuEntry(value: null, label: 'Loading')];
                       case ConnectionState.active:
                       case ConnectionState.done:
                         if (snapshot.hasError) {
-                          products = [DropdownMenuEntry(value: 'Error', label: 'Error')];
+                          products = [DropdownMenuEntry(value: null, label: 'Error')];
                         } else {
-                          products = snapshot.data!.map((p) {
-                            return DropdownMenuEntry(value: p.name, label: p.name);
-                          }).toList();
+                          for (final p in snapshot.data!) {
+                            products.add(DropdownMenuEntry(value: p, label: p.name));
+                          }
                         }
                     }
 
-                    return DropdownMenu<String>(
-                      width: 250,
-                      controller: productController,
-                      label: Text('Product'),
-                      dropdownMenuEntries: products
+                    return Expanded(
+                      flex: 2,
+                      child: DropdownMenuDebounced(
+                        onSearch: _onSearch,
+                        hintText: 'Product',
+                        onChanged: (text) => searchText = text,
+                      ),
                     );
                   }
                 ),
-                
                 SizedBox(width: 10,),
                 Expanded(
                   flex: 3,
@@ -153,6 +161,7 @@ class _OrderItemFormState extends State<OrderItemForm> {
                 Expanded(
                   flex: 1,
                   child: TextField(
+                    keyboardType: TextInputType.number,
                     controller: costController..text = widget.order != null ? widget.order!.cost.toString() : '',
                     decoration: InputDecoration(
                       hintText: 'Cost'
@@ -163,6 +172,7 @@ class _OrderItemFormState extends State<OrderItemForm> {
                 Expanded(
                   flex: 1,
                   child: TextField(
+                    keyboardType: TextInputType.number,
                     controller: qtyController..text = widget.order != null ? widget.order!.qty.toString() : '',
                     decoration: InputDecoration(
                       hintText: 'Qty'
@@ -173,6 +183,7 @@ class _OrderItemFormState extends State<OrderItemForm> {
                 Expanded(
                   flex: 1,
                   child: TextField(
+                    keyboardType: TextInputType.number,
                     controller: priceController..text = widget.order != null ? widget.order!.price.toString() : '',
                     decoration: InputDecoration(
                       hintText: 'Price'
