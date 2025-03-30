@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:produck_workshop/component/order_list.dart';
 import 'package:produck_workshop/component/project_form_card.dart';
 import 'package:produck_workshop/db.dart';
-import 'package:produck_workshop/dummy/order_list.dart';
+import 'package:produck_workshop/schema/order.dart';
 import 'package:produck_workshop/schema/project.dart';
 
 class ProjectScreen extends StatefulWidget {
@@ -84,6 +84,18 @@ class _ProjectScreenState extends State<ProjectScreen> {
     });
   }
 
+  Future<void> submitOrder(Order order) async {
+    final db = DatabaseService.db;
+
+    await db.writeTxn(() async {
+      final project = (await db.projects.get(widget.projectId))!;
+
+      project.orders = [...project.orders, order];
+
+      await db.projects.put(project);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<Project?>(
@@ -116,7 +128,8 @@ class _ProjectScreenState extends State<ProjectScreen> {
                           height: 10
                         ),
                         OrderList(
-                          orders: dummyOrders
+                          orders: project.orders,
+                          onSubmit: submitOrder,
                         )
                       ],
                     ),

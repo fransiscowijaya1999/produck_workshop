@@ -14,12 +14,14 @@ class OrderItemForm extends StatefulWidget {
     this.order,
     this.formState = CreateFormState.order,
     this.submitAction = FormSubmitAction.create,
+    this.onSubmit,
     this.onCancel
   });
 
   final Order? order;
   final CreateFormState formState;
   final FormSubmitAction submitAction;
+  final ValueSetter<Order>? onSubmit;
   final VoidCallback? onCancel;
 
   @override
@@ -31,17 +33,37 @@ class _OrderItemFormState extends State<OrderItemForm> {
   final costController = TextEditingController();
   final qtyController = TextEditingController();
   final priceController = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
+  final FocusNode _keyboardFocusNode = FocusNode();
+  late FocusNode _descriptionFocusNode;
+  late FocusNode _priceFocusNode;
 
   late Future<List<Product>> futureProducts;
 
+  late double price;
+  late double cost;
+  late double margin;
+
   bool isBroker = false;
   String searchText = '';
+  Product? selectedProduct;
 
   @override
   void initState() {
     super.initState();
     futureProducts = ProductService.filterProductLimited("", 5);
+    _descriptionFocusNode = FocusNode();
+    _priceFocusNode = FocusNode();
+    costController.addListener(() => setState(() {
+      cost = double.tryParse(costController.text) ?? 0;
+      margin = ((price - cost) / price) * 100;
+    }));
+    priceController.addListener(() => setState(() {
+      price = double.tryParse(priceController.text) ?? 0;
+      margin = ((price - cost) / price) * 100;
+    }));
+    cost = double.tryParse(costController.text) ?? 0;
+    price = double.tryParse(priceController.text) ?? 0;
+    margin = ((price - cost) / price) * 100;
   }
 
   @override
@@ -50,8 +72,31 @@ class _OrderItemFormState extends State<OrderItemForm> {
     costController.dispose();
     qtyController.dispose();
     priceController.dispose();
-    _focusNode.dispose();
+    _keyboardFocusNode.dispose();
+    _descriptionFocusNode.dispose();
+    _priceFocusNode.dispose();
     super.dispose();
+  }
+
+  String removeDecimalZeroFormat(double n) {
+    return n.toStringAsFixed(n.truncateToDouble() == n ? 0 : 1);
+  }
+
+  void submitOrder() {
+    if (widget.onSubmit != null && (widget.formState == CreateFormState.group || (selectedProduct != null && widget.formState == CreateFormState.order))) {
+      final newOrder = Order()
+        ..isGroup = widget.formState == CreateFormState.group ? true : false
+        ..description = descriptionController.text
+        ..productId = selectedProduct?.id
+        ..qty = int.tryParse(qtyController.text) ?? 0
+        ..price = double.tryParse(priceController.text) ?? 0
+        ..cost = double.tryParse(costController.text) ?? 0
+        ..isBroker = isBroker
+        ..orders = widget.formState == CreateFormState.group ? [] : null
+      ;
+
+      widget.onSubmit!(newOrder);
+    }
   }
 
   void formKeyDownHandler(KeyEvent event) {
@@ -59,21 +104,35 @@ class _OrderItemFormState extends State<OrderItemForm> {
       if (event.logicalKey == LogicalKeyboardKey.escape) {
         if (widget.onCancel != null) { widget.onCancel!(); }
       }
+      if (event.logicalKey == LogicalKeyboardKey.enter) {
+        submitOrder();
+      }
     }
   }
 
   void _onProductSelected(Product product) {
     setState(() {
-      costController.text = product.cost.toString();
-      priceController.text = product.price.toString();
+      descriptionController.text = product.name;
+      costController.text = removeDecimalZeroFormat(product.cost).toString();
+      priceController.text = removeDecimalZeroFormat(product.price).toString();
       qtyController.text = 1.toString();
+      selectedProduct = product;
     });
+    _priceFocusNode.requestFocus();
   }
 
   void _onSearch(String text) {
     setState(() {
       futureProducts = ProductService.filterProductLimited(searchText, 5);
     });
+  }
+
+  Text marginHelperText() {
+    Color textColor = margin >= 10 ? Colors.green : (margin <= 0 ? Colors.red : Colors.orange);
+
+    return Text('${removeDecimalZeroFormat(margin)} %', style: TextStyle(
+      color: textColor
+    ));
   }
 
   TextStyle shrinkStyle() {
@@ -94,8 +153,7 @@ class _OrderItemFormState extends State<OrderItemForm> {
           horizontalTitleGap: 5,
           dense: true,
           title: KeyboardListener(
-            focusNode: _focusNode,
-            autofocus: true,
+            focusNode: _keyboardFocusNode,
             onKeyEvent: formKeyDownHandler,
             child: TextField(
               controller: descriptionController,
@@ -113,45 +171,50 @@ class _OrderItemFormState extends State<OrderItemForm> {
           horizontalTitleGap: 5,
           dense: true,
           title: KeyboardListener(
-            focusNode: _focusNode,
+            focusNode: _keyboardFocusNode,
             onKeyEvent: formKeyDownHandler,
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                FutureBuilder<List<Product>>(
-                  future: futureProducts,
-                  builder: (BuildContext context, AsyncSnapshot<List<Product>> snapshot) {
-                    List<DropdownMenuEntry<Product?>> products = [];
-                    
-                    switch (snapshot.connectionState) {
-                      case ConnectionState.none:
-                      case ConnectionState.waiting:
-                          products = [DropdownMenuEntry(value: null, label: 'Loading')];
-                      case ConnectionState.active:
-                      case ConnectionState.done:
-                        if (snapshot.hasError) {
-                          products = [DropdownMenuEntry(value: null, label: 'Error')];
-                        } else {
-                          for (final p in snapshot.data!) {
-                            products.add(DropdownMenuEntry(value: p, label: p.name));
-                          }
-                        }
-                    }
+                Expanded(
+                  flex: 2,
+                  child: FutureBuilder<List<Product>>(
+                    future: futureProducts,
+                    builder: (BuildContext context, AsyncSnapshot<List<Product>> snapshot) {
+                      List<Product> products = [];
+                      
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.none:
+                        case ConnectionState.waiting:
+                            return DropdownMenuDebounced(onSearch: (text) {}, list: [], isLoading: true,);
+                        case ConnectionState.active:
+                        case ConnectionState.done:
+                          if (snapshot.hasError) {
+                            return DropdownMenuDebounced(onSearch: (text) {}, list: [], isLoading: true,);
+                          } else {
+                            products = snapshot.data!;
 
-                    return Expanded(
-                      flex: 2,
-                      child: DropdownMenuDebounced(
-                        onSearch: _onSearch,
-                        hintText: 'Product',
-                        onChanged: (text) => searchText = text,
-                      ),
-                    );
-                  }
+                            return DropdownMenuDebounced(
+                              onSearch: _onSearch,
+                              hintText: 'Product',
+                              onChanged: (text) => searchText = text,
+                              onSelected: (index) {
+                                _onProductSelected(products[index]);
+                              },
+                              list: products.map((p) => p.name).toList(),
+                              hasSelection: selectedProduct?.name,
+                            );
+                          }
+                      }
+                    }
+                  ),
                 ),
                 SizedBox(width: 10,),
                 Expanded(
                   flex: 3,
                   child: TextField(
-                    controller: descriptionController..text = widget.order != null ? widget.order!.description : '',
+                    focusNode: _descriptionFocusNode,
+                    controller: descriptionController,
                     decoration: InputDecoration(
                       hintText: 'Description',
                     ),
@@ -162,7 +225,7 @@ class _OrderItemFormState extends State<OrderItemForm> {
                   flex: 1,
                   child: TextField(
                     keyboardType: TextInputType.number,
-                    controller: costController..text = widget.order != null ? widget.order!.cost.toString() : '',
+                    controller: costController,
                     decoration: InputDecoration(
                       hintText: 'Cost'
                     ),
@@ -173,7 +236,7 @@ class _OrderItemFormState extends State<OrderItemForm> {
                   flex: 1,
                   child: TextField(
                     keyboardType: TextInputType.number,
-                    controller: qtyController..text = widget.order != null ? widget.order!.qty.toString() : '',
+                    controller: qtyController,
                     decoration: InputDecoration(
                       hintText: 'Qty'
                     ),
@@ -184,9 +247,10 @@ class _OrderItemFormState extends State<OrderItemForm> {
                   flex: 1,
                   child: TextField(
                     keyboardType: TextInputType.number,
-                    controller: priceController..text = widget.order != null ? widget.order!.price.toString() : '',
+                    controller: priceController,
                     decoration: InputDecoration(
-                      hintText: 'Price'
+                      hintText: 'Price',
+                      helper: marginHelperText(),
                     ),
                   ),
                 ),

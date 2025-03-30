@@ -2,18 +2,27 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:produck_workshop/component/dropdownmenu_overlay.dart';
 
 class DropdownMenuDebounced extends StatefulWidget {
   const DropdownMenuDebounced({
     super.key,
     required this.onSearch,
     this.onChanged,
+    this.onSelected,
     this.hintText = 'Search...',
+    this.isLoading = false,
+    required this.list,
+    this.hasSelection
   });
 
   final Function(String search) onSearch;
   final Function(String text)? onChanged;
+  final Function(int index)? onSelected;
   final String hintText;
+  final bool isLoading;
+  final List<String> list;
+  final String? hasSelection;
 
   @override
   State<DropdownMenuDebounced> createState() => _DropdownMenuDebouncedState();
@@ -28,12 +37,16 @@ class _DropdownMenuDebouncedState extends State<DropdownMenuDebounced> {
   late FocusNode keyboardFocusNode;
   late Size size;
   final layerLink = LayerLink();
+  int selectedIndex = 0;
 
   _onSearchChanged(String text) async {
     if (widget.onChanged != null) widget.onChanged!(text);
     if (_debounce?.isActive ?? false) _debounce?.cancel();
     _debounce = Timer(_debounceDuration, () async {
       await widget.onSearch(text);
+      setState(() {
+        selectedIndex = 0;
+      });
     });
   }
 
@@ -42,14 +55,51 @@ class _DropdownMenuDebouncedState extends State<DropdownMenuDebounced> {
     size = targetRenderBox.size;
   }
 
+  void moveSelection(int step) {
+    final int afterStep = selectedIndex + step;
+
+    if (afterStep >= 0 && afterStep < widget.list.length) {
+      setState(() {
+        selectedIndex = selectedIndex + step;
+      });
+    }
+  }
+
+  void onKeyDown(KeyEvent event) {
+    if (event is KeyDownEvent) {
+      if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+        moveSelection(1);
+      }
+      if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+        moveSelection(-1);
+      }
+      if (event.logicalKey == LogicalKeyboardKey.enter) {
+        setState(() {
+          productController.text = widget.list[selectedIndex];
+        });
+        if (widget.onSelected != null) widget.onSelected!(selectedIndex);
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((_) => initPosition());
+    WidgetsBinding.instance.addPostFrameCallback((_) => initPosition());
 
     keyboardFocusNode = FocusNode();
     focusNode = FocusNode();
     focusNode.addListener(() {
+      if (focusNode.hasFocus) {
+        if (widget.hasSelection != null) {
+          productController.text = '';
+        }
+      } else {
+        if (widget.hasSelection != null) {
+          productController.text = widget.hasSelection!;
+        }
+      }
+
       productsOverlayController.toggle();
     });
 
@@ -78,12 +128,11 @@ class _DropdownMenuDebouncedState extends State<DropdownMenuDebounced> {
             link: layerLink,
             showWhenUnlinked: false,
             offset: Offset(-15, size.height + 10),
-            child: Card(
-              child: Padding(
-                padding: EdgeInsets.all(5),
-                child: Text('child'),
-              ),
-            ),
+            child: DropdownmenuOverlay(
+              list: widget.list,
+              isLoading: widget.isLoading,
+              selectedIndex: selectedIndex,
+            )
           ),
         );
       },
@@ -95,10 +144,14 @@ class _DropdownMenuDebouncedState extends State<DropdownMenuDebounced> {
               SingleActivator(LogicalKeyboardKey.arrowDown, alt: false): Intent.doNothing,
               SingleActivator(LogicalKeyboardKey.arrowUp, alt: false): Intent.doNothing,
             },
-            child: TextField(
-              controller: productController,
-              autofocus: true,
-              focusNode: focusNode,
+            child: KeyboardListener(
+              onKeyEvent: onKeyDown,
+              focusNode: keyboardFocusNode,
+              child: TextField(
+                controller: productController,
+                autofocus: true,
+                focusNode: focusNode,
+              ),
             ),
           ),
         ),

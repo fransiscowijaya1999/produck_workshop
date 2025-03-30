@@ -9,9 +9,11 @@ class OrderList extends StatefulWidget {
   const OrderList({
     super.key,
     this.orders = const [],
+    this.onSubmit
   });
 
   final List<Order> orders;
+  final ValueSetter<Order>? onSubmit;
 
   @override
   State<OrderList> createState() => _OrderListState();
@@ -63,11 +65,7 @@ class _OrderListState extends State<OrderList> {
                 ),
               ),
               Expanded(
-                flex: 3,
-                child: Text('Product')
-              ),
-              Expanded(
-                flex: 6,
+                flex: 5,
                 child: Text('Description')
               ),
               Expanded(
@@ -143,6 +141,7 @@ class _OrderListState extends State<OrderList> {
             OrderItemForm(
               formState: createFormState,
               submitAction: FormSubmitAction.create,
+              onSubmit: widget.onSubmit,
               onCancel: () {
                 setState(() {
                   createFormState = CreateFormState.off;

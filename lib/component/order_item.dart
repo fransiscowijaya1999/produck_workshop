@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:produck_workshop/component/order_list.dart';
 import 'package:produck_workshop/schema/order.dart';
+import 'package:produck_workshop/util/project.dart';
 
 class OrderItem extends StatelessWidget {
   const OrderItem({
@@ -39,7 +40,7 @@ class OrderItem extends StatelessWidget {
             ),
             Expanded(
               flex: 2,
-              child: Text('Rp Total'),
+              child: Text('Rp${removeDecimalZeroFormat(getOrdersTotalPrice(order.orders))}'),
             )
           ],
         ),
@@ -52,6 +53,7 @@ class OrderItem extends StatelessWidget {
     }
 
     return ListTile(
+      tileColor: order.isBroker ? Colors.amber : null,
       contentPadding: EdgeInsets.all(0),
       minVerticalPadding: 0,
       horizontalTitleGap: 5,
@@ -66,16 +68,12 @@ class OrderItem extends StatelessWidget {
             ),
           ),
           Expanded(
-            flex: 3,
-            child: Text('Product')
-          ),
-          Expanded(
-            flex: 6,
+            flex: 5,
             child: Text(order.description)
           ),
           Expanded(
             flex: 1,
-            child: Text('Rp${order.cost}'),
+            child: Text('Rp${removeDecimalZeroFormat(order.cost)}'),
           ),
           Expanded(
             flex: 1,
@@ -83,11 +81,11 @@ class OrderItem extends StatelessWidget {
           ),
           Expanded(
             flex: 1,
-            child: Text('Rp${order.price}'),
+            child: Text('Rp${removeDecimalZeroFormat(order.price)}'),
           ),
           Expanded(
             flex: 2,
-            child: Text('Rp${order.qty * order.price}'),
+            child: Text('Rp${removeDecimalZeroFormat(order.qty * order.price)}'),
           )
         ],
       ),

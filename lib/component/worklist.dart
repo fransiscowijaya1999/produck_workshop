@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:produck_workshop/schema/project.dart';
+import 'package:produck_workshop/util/project.dart';
 
 class WorklistDestination {
   WorklistDestination({
@@ -85,7 +86,7 @@ class WorklistTile extends StatelessWidget {
                   TextSpan(text: project.vehicle, style: TextStyle(fontSize: 10, color: Colors.grey)),
                   TextSpan(text: '\n')
                 ],
-                TextSpan(text: 'Rp10,000', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black54))
+                TextSpan(text: 'Rp${removeDecimalZeroFormat(getOrdersTotalPrice(project.orders))}', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.black54))
               ]
             )
           ),
