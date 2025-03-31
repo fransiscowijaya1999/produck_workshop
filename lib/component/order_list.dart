@@ -13,7 +13,7 @@ class OrderList extends StatefulWidget {
   });
 
   final List<Order> orders;
-  final ValueSetter<Order>? onSubmit;
+  final Future Function(List<Order>)? onSubmit;
 
   @override
   State<OrderList> createState() => _OrderListState();
@@ -23,6 +23,18 @@ class _OrderListState extends State<OrderList> {
   final List<Order> _selectedOrder = [];
   int? currentEditIndex;
   CreateFormState createFormState = CreateFormState.off;
+
+  Future<void> _onSubmit(Order order) async {
+    if (widget.onSubmit != null) {
+      await widget.onSubmit!([...widget.orders, order]);
+    }
+  }
+
+  Future<void> _onSubmitGroup(Order order) async {
+    if (widget.onSubmit != null) {
+      await widget.onSubmit!(widget.orders);
+    }
+  }
 
   void onChecked(Order order) {
     if (_selectedOrder.contains(order)) {
@@ -102,6 +114,7 @@ class _OrderListState extends State<OrderList> {
                 order: order,
                 isChecked: _selectedOrder.contains(order),
                 onChecked: onChecked,
+                onSubmit: _onSubmitGroup,
               );
             },
             onReorder: (int oldIndex, int newIndex) {
@@ -141,7 +154,7 @@ class _OrderListState extends State<OrderList> {
             OrderItemForm(
               formState: createFormState,
               submitAction: FormSubmitAction.create,
-              onSubmit: widget.onSubmit,
+              onSubmit: _onSubmit,
               onCancel: () {
                 setState(() {
                   createFormState = CreateFormState.off;

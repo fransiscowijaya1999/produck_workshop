@@ -21,7 +21,7 @@ class OrderItemForm extends StatefulWidget {
   final Order? order;
   final CreateFormState formState;
   final FormSubmitAction submitAction;
-  final ValueSetter<Order>? onSubmit;
+  final Future Function(Order)? onSubmit;
   final VoidCallback? onCancel;
 
   @override
@@ -82,7 +82,7 @@ class _OrderItemFormState extends State<OrderItemForm> {
     return n.toStringAsFixed(n.truncateToDouble() == n ? 0 : 1);
   }
 
-  void submitOrder() {
+  Future<void> submitOrder() async {
     if (widget.onSubmit != null && (widget.formState == CreateFormState.group || (selectedProduct != null && widget.formState == CreateFormState.order))) {
       final newOrder = Order()
         ..isGroup = widget.formState == CreateFormState.group ? true : false
@@ -95,7 +95,16 @@ class _OrderItemFormState extends State<OrderItemForm> {
         ..orders = widget.formState == CreateFormState.group ? [] : null
       ;
 
-      widget.onSubmit!(newOrder);
+      await widget.onSubmit!(newOrder);
+
+      setState(() {
+        descriptionController.clear();
+        selectedProduct = null;
+        qtyController.clear();
+        priceController.clear();
+        costController.clear();
+        isBroker = false;
+      });
     }
   }
 

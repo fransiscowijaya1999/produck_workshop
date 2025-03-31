@@ -84,13 +84,13 @@ class _ProjectScreenState extends State<ProjectScreen> {
     });
   }
 
-  Future<void> submitOrder(Order order) async {
+  Future<void> submitOrder(List<Order> newOrders) async {
     final db = DatabaseService.db;
 
     await db.writeTxn(() async {
       final project = (await db.projects.get(widget.projectId))!;
 
-      project.orders = [...project.orders, order];
+      project.orders = newOrders;
 
       await db.projects.put(project);
     });

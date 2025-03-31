@@ -9,11 +9,20 @@ class OrderItem extends StatelessWidget {
     required this.order,
     this.isChecked = false,
     this.onChecked,
+    this.onSubmit
   });
 
   final Order order;
   final bool isChecked;
   final ValueSetter<Order>? onChecked;
+  final Future Function(Order)? onSubmit;
+
+  Future<void> _onSubmitGroup(List<Order> newOrders) async {
+    if (onSubmit != null && order.isGroup) {
+      order.orders = newOrders;
+      onSubmit!(order);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +56,7 @@ class OrderItem extends StatelessWidget {
         children: [
           OrderList(
             orders: order.orders ?? [],
+            onSubmit: _onSubmitGroup,
           )
         ],
       );
@@ -73,11 +83,19 @@ class OrderItem extends StatelessWidget {
           ),
           Expanded(
             flex: 1,
-            child: Text('Rp${removeDecimalZeroFormat(order.cost)}'),
+            child: Text('Rp${removeDecimalZeroFormat(order.cost)}',
+              style: TextStyle(
+                color: Colors.black54
+              ),
+            ),
           ),
           Expanded(
             flex: 1,
-            child: Text('${order.qty}'),
+            child: Text('${order.qty}',
+              style: TextStyle(
+                fontWeight: FontWeight.bold
+              ),
+            ),
           ),
           Expanded(
             flex: 1,
@@ -85,7 +103,9 @@ class OrderItem extends StatelessWidget {
           ),
           Expanded(
             flex: 2,
-            child: Text('Rp${removeDecimalZeroFormat(order.qty * order.price)}'),
+            child: Text('Rp${removeDecimalZeroFormat(order.qty * order.price)}',
+              style: TextStyle(),
+            ),
           )
         ],
       ),
