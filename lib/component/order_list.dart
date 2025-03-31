@@ -20,7 +20,7 @@ class OrderList extends StatefulWidget {
 }
 
 class _OrderListState extends State<OrderList> {
-  final List<Order> _selectedOrder = [];
+  List<Order> _selectedOrder = [];
   int? currentEditIndex;
   CreateFormState createFormState = CreateFormState.off;
 
@@ -34,6 +34,56 @@ class _OrderListState extends State<OrderList> {
     if (widget.onSubmit != null) {
       await widget.onSubmit!(widget.orders);
     }
+  }
+
+  Future<void> _onOrdersDelete() async {
+    if (widget.onSubmit != null) {
+      final List<Order> remains = List.from(widget.orders);
+
+      remains.removeWhere((o) => _selectedOrder.contains(o));
+
+      await widget.onSubmit!(remains);
+
+      setState(() {
+        _selectedOrder = [];
+      });
+    }
+  }
+
+  Future<void> _selectedDialogBuilder(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Selected Items: ${_selectedOrder.length}'),
+          content: SizedBox(
+            width: 300,
+            height: 300,
+            child: ListView.builder(
+              itemCount: _selectedOrder.length,
+              itemBuilder: (_, index) {
+                final order = _selectedOrder[index];
+            
+                return ListTile(
+                  key: Key('$index'),
+                  dense: true,
+                  title: Text('${index + 1}. ${order.description}'),
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _onOrdersDelete();
+                Navigator.of(context).pop();
+              },
+              child: const Icon(Icons.delete)
+            )
+          ],
+        );
+      }
+    );
   }
 
   void onChecked(Order order) {
@@ -54,10 +104,13 @@ class _OrderListState extends State<OrderList> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(5),
             child: Row(
               children: [
-                Text('Selected Items: ${_selectedOrder.length}'),
+                TextButton(
+                  onPressed: _selectedOrder.isNotEmpty ? () => _selectedDialogBuilder(context) : null,
+                  child: Text('Selected Items: ${_selectedOrder.length}'),
+                ),
               ],
             ),
           ),
