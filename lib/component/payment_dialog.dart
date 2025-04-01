@@ -51,10 +51,6 @@ class _PaymentDialogState extends State<PaymentDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly
-              ],
-              keyboardType: TextInputType.number,
               controller: dateController,
               decoration: InputDecoration(
                 hintText: 'Date'
@@ -62,6 +58,10 @@ class _PaymentDialogState extends State<PaymentDialog> {
             ),
             TextField(
               autofocus: true,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly
+              ],
+              keyboardType: TextInputType.number,
               controller: amountController,
               decoration: InputDecoration(
                 hintText: 'Amount'

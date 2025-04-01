@@ -165,6 +165,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
                           totalPrice: getOrdersTotalPrice(project.orders),
                           paid: getProjectPaid(project.payments),
                           paymentCount: project.payments.length,
+                          payments: project.payments,
                           onSave: saveProject,
                           onDelete: deleteProject,
                           onPayment: () => _paymentDialogBuilder(context),

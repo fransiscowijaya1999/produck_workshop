@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:produck_workshop/component/payment_history_dialog.dart';
+import 'package:produck_workshop/schema/payment.dart';
 import 'package:produck_workshop/util/project.dart';
 
 typedef SaveCallback = void Function(String label, String vehicle, String date);
@@ -12,6 +14,7 @@ class ProjectFormCard extends StatefulWidget {
     this.totalPrice = 0,
     this.paid = 0,
     this.paymentCount = 0,
+    this.payments,
     this.onSave,
     this.onDelete,
     this.onPayment,
@@ -25,6 +28,7 @@ class ProjectFormCard extends StatefulWidget {
   final double totalPrice;
   final double paid;
   final int paymentCount;
+  final List<Payment>? payments;
   final SaveCallback? onSave;
   final VoidCallback? onDelete;
   final VoidCallback? onPayment;
@@ -54,6 +58,12 @@ class _ProjectFormCardState extends State<ProjectFormCard> {
     vehicleController.dispose();
     dateController.dispose();
     super.dispose();
+  }
+
+  Future<void> _showPaymentHistory(BuildContext context) async {
+    return showDialog(context: context, builder: (BuildContext context) {
+      return PaymentHistoryDialog(payments: widget.payments ?? []);
+    });
   }
 
   @override
@@ -132,7 +142,7 @@ class _ProjectFormCardState extends State<ProjectFormCard> {
                         ]
                       )
                     ),
-                    TextButton(onPressed: null, child: Icon(Icons.history))
+                    TextButton(onPressed: widget.payments != null ? (widget.payments!.isNotEmpty ? () {_showPaymentHistory(context);} : null) : null, child: Icon(Icons.history))
                   ],
                 )
               ],
