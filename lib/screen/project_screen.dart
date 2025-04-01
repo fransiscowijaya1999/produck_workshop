@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:produck_workshop/component/order_list.dart';
 import 'package:produck_workshop/component/project_form_card.dart';
 import 'package:produck_workshop/db.dart';
@@ -66,6 +67,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
 
       project.label = label;
       project.vehicle = vehicle;
+      project.date = DateFormat('yyyy-MM-dd').parse(date);
 
       await db.projects.put(project);
     });
@@ -119,7 +121,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
                         ProjectFormCard(
                           label: project.label,
                           vehicle: project.vehicle,
-                          date: project.date.toString(),
+                          date: DateFormat('yyyy-MM-dd').format(project.date),
                           onSave: saveProject,
                           onDelete: deleteProject,
                           isSaving: isSaving

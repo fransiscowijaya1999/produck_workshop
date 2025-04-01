@@ -95,13 +95,38 @@ class _ProjectFormCardState extends State<ProjectFormCard> {
             Divider(
               height: 30,
             ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Paid: Rp0 / Rp200 (-Rp200)'),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text('Payment Count:'),
+                    TextButton(onPressed: null, child: Icon(Icons.history))
+                  ],
+                )
+              ],
+            ),
+            Divider(
+              height: 30,
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ElevatedButton(
-                  onPressed: widget.onSave != null && !widget.isSaving ? () { widget.onSave!(labelController.text, vehicleController.text, dateController.text); } : null,
-                  child: widget.isSaving ? const SizedBox(height: 5, child: CircularProgressIndicator()) : const Text('Save')
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: widget.onSave != null && !widget.isSaving ? () { widget.onSave!(labelController.text, vehicleController.text, dateController.text); } : null,
+                      child: widget.isSaving ? const SizedBox(height: 5, child: CircularProgressIndicator()) : const Text('Save')
+                    ),
+                    SizedBox(width: 10,),
+                    ElevatedButton(
+                      onPressed: null,
+                      child: Text('Payment')
+                    )
+                  ],
                 ),
                 ElevatedButton(
                   onPressed: widget.onDelete != null ? () { widget.onDelete!(); } : null,
