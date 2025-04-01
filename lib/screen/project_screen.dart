@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:produck_workshop/component/order_list.dart';
+import 'package:produck_workshop/component/payment_dialog.dart';
 import 'package:produck_workshop/component/project_form_card.dart';
 import 'package:produck_workshop/db.dart';
 import 'package:produck_workshop/schema/order.dart';
+import 'package:produck_workshop/schema/payment.dart';
 import 'package:produck_workshop/schema/project.dart';
 import 'package:produck_workshop/util/project.dart';
 
@@ -77,6 +79,43 @@ class _ProjectScreenState extends State<ProjectScreen> {
     });
   }
 
+  Future<void> createPayment(DateTime date, double amount) async {
+    final db = DatabaseService.db;
+    await db.writeTxn(() async {
+      final project = (await db.projects.get(widget.projectId))!;
+      final payment = Payment();
+      final remainingPayment = getOrdersTotalPrice(project.orders) - getProjectPaid(project.payments);
+      final paid = amount > remainingPayment ? remainingPayment : amount;
+
+      if (amount >= remainingPayment) {
+        project.isUploaded = true;
+      }
+      payment.date = date;
+      payment.amount = paid;
+      
+      project.payments = [...project.payments, payment];
+
+      await db.projects.put(project);
+    });
+  }
+
+  Future<void> _paymentDialogBuilder(BuildContext context) async {
+    final project = (await db.projects.get(widget.projectId))!;
+
+    if (context.mounted) {
+      return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return PaymentDialog(
+            remainingPayment: getOrdersTotalPrice(project.orders) - getProjectPaid(project.payments),
+            onSubmit: (date, amount) async => await createPayment(date, amount),
+          );
+        }
+      );
+    }
+  }
+
+
   Future<void> deleteProject() async {
     final db = DatabaseService.db;
     await db.writeTxn(() async {
@@ -128,7 +167,9 @@ class _ProjectScreenState extends State<ProjectScreen> {
                           paymentCount: project.payments.length,
                           onSave: saveProject,
                           onDelete: deleteProject,
-                          isSaving: isSaving
+                          onPayment: () => _paymentDialogBuilder(context),
+                          isSaving: isSaving,
+                          isUploaded: project.isUploaded,
                         ),
                         SizedBox(
                           height: 10

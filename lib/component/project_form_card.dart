@@ -14,7 +14,9 @@ class ProjectFormCard extends StatefulWidget {
     this.paymentCount = 0,
     this.onSave,
     this.onDelete,
+    this.onPayment,
     this.isSaving = false,
+    this.isUploaded = false,
   });
 
   final String label;
@@ -25,7 +27,9 @@ class ProjectFormCard extends StatefulWidget {
   final int paymentCount;
   final SaveCallback? onSave;
   final VoidCallback? onDelete;
+  final VoidCallback? onPayment;
   final bool isSaving;
+  final bool isUploaded;
 
   @override
   State<ProjectFormCard> createState() => _ProjectFormCardState();
@@ -148,9 +152,26 @@ class _ProjectFormCardState extends State<ProjectFormCard> {
                     ),
                     SizedBox(width: 10,),
                     ElevatedButton(
-                      onPressed: null,
+                      onPressed: widget.paid >= widget.totalPrice ? null : widget.onPayment,
                       child: Text('Payment')
-                    )
+                    ),
+                    if (widget.isUploaded)
+                      ...[
+                        SizedBox(width: 10,),
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.green
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(5),
+                            child: Text('Uploaded', style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold
+                            ),),
+                          ),
+                        )
+                      ]
                   ],
                 ),
                 ElevatedButton(
