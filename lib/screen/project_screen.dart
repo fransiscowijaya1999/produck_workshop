@@ -7,6 +7,7 @@ import 'package:produck_workshop/component/project_form_card.dart';
 import 'package:produck_workshop/db.dart';
 import 'package:produck_workshop/schema/order.dart';
 import 'package:produck_workshop/schema/project.dart';
+import 'package:produck_workshop/util/project.dart';
 
 class ProjectScreen extends StatefulWidget {
   const ProjectScreen({
@@ -122,6 +123,9 @@ class _ProjectScreenState extends State<ProjectScreen> {
                           label: project.label,
                           vehicle: project.vehicle,
                           date: DateFormat('yyyy-MM-dd').format(project.date),
+                          totalPrice: getOrdersTotalPrice(project.orders),
+                          paid: getProjectPaid(project.payments),
+                          paymentCount: project.payments.length,
                           onSave: saveProject,
                           onDelete: deleteProject,
                           isSaving: isSaving

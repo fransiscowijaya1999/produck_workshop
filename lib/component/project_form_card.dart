@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:produck_workshop/util/project.dart';
 
 typedef SaveCallback = void Function(String label, String vehicle, String date);
 
@@ -8,6 +9,9 @@ class ProjectFormCard extends StatefulWidget {
     this.label = '',
     this.vehicle = '',
     this.date = '',
+    this.totalPrice = 0,
+    this.paid = 0,
+    this.paymentCount = 0,
     this.onSave,
     this.onDelete,
     this.isSaving = false,
@@ -16,6 +20,9 @@ class ProjectFormCard extends StatefulWidget {
   final String label;
   final String vehicle;
   final String date;
+  final double totalPrice;
+  final double paid;
+  final int paymentCount;
   final SaveCallback? onSave;
   final VoidCallback? onDelete;
   final bool isSaving;
@@ -98,11 +105,29 @@ class _ProjectFormCardState extends State<ProjectFormCard> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Paid: Rp0 / Rp200 (-Rp200)'),
+                RichText(
+                  text: TextSpan(
+                    style: DefaultTextStyle.of(context).style,
+                    children: <TextSpan>[
+                      TextSpan(text: 'Paid: '),
+                      TextSpan(text: 'Rp${removeDecimalZeroFormat(widget.paid)}', style: TextStyle(fontWeight: FontWeight.bold)),
+                      TextSpan(text: ' / Rp${removeDecimalZeroFormat(widget.totalPrice)} '),
+                      TextSpan(text: '(-Rp${removeDecimalZeroFormat(widget.totalPrice - widget.paid)})', style: TextStyle(color: Colors.red))
+                    ]
+                  )
+                ),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text('Payment Count:'),
+                    RichText(
+                      text: TextSpan(
+                        style: DefaultTextStyle.of(context).style,
+                        children: <TextSpan>[
+                          TextSpan(text: 'Payment Count: '),
+                          TextSpan(text: '${widget.paymentCount}', style: TextStyle(fontWeight: FontWeight.bold)),
+                        ]
+                      )
+                    ),
                     TextButton(onPressed: null, child: Icon(Icons.history))
                   ],
                 )
