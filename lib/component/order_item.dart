@@ -24,6 +24,13 @@ class OrderItem extends StatelessWidget {
     }
   }
 
+  Future<void> _onQtyIncrement() async {
+    if (onSubmit != null) {
+      order.qty += 1;
+      onSubmit!(order);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (order.isGroup) {
@@ -91,9 +98,19 @@ class OrderItem extends StatelessWidget {
           ),
           Expanded(
             flex: 1,
-            child: Text('${order.qty}',
-              style: TextStyle(
-                fontWeight: FontWeight.bold
+            child: SizedBox(
+              height: 20,
+              child: TextButton(
+                onPressed: _onQtyIncrement,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('${order.qty}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold
+                    ),
+                    textAlign: TextAlign.start,
+                  ),
+                ),
               ),
             ),
           ),
