@@ -74,9 +74,6 @@ class _DropdownMenuDebouncedState extends State<DropdownMenuDebounced> {
         moveSelection(-1);
       }
       if (event.logicalKey == LogicalKeyboardKey.enter) {
-        setState(() {
-          productController.text = widget.list[selectedIndex];
-        });
         if (widget.onSelected != null) widget.onSelected!(selectedIndex);
       }
     }
@@ -143,13 +140,14 @@ class _DropdownMenuDebouncedState extends State<DropdownMenuDebounced> {
             shortcuts: <ShortcutActivator, Intent>{
               SingleActivator(LogicalKeyboardKey.arrowDown, alt: false): Intent.doNothing,
               SingleActivator(LogicalKeyboardKey.arrowUp, alt: false): Intent.doNothing,
+              SingleActivator(LogicalKeyboardKey.enter, alt: false): Intent.doNothing,
             },
             child: KeyboardListener(
               onKeyEvent: onKeyDown,
               focusNode: keyboardFocusNode,
               child: TextField(
-                controller: productController,
                 autofocus: true,
+                controller: productController,
                 focusNode: focusNode,
               ),
             ),

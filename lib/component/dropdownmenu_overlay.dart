@@ -17,8 +17,8 @@ class DropdownmenuOverlay extends StatelessWidget {
     return Card(
       child: isLoading ?
         Padding(
-          padding: const EdgeInsets.all(10),
-          child: SizedBox(width: 50, child: const CircularProgressIndicator()),
+          padding: const EdgeInsets.all(15),
+          child: Center(child: const CircularProgressIndicator()),
         ) :
         ListView.builder(
           shrinkWrap: true,

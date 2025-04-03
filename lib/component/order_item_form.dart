@@ -34,8 +34,9 @@ class _OrderItemFormState extends State<OrderItemForm> {
   final qtyController = TextEditingController();
   final priceController = TextEditingController();
   final FocusNode _keyboardFocusNode = FocusNode();
-  late FocusNode _descriptionFocusNode;
-  late FocusNode _priceFocusNode;
+  final FocusNode _descriptionFocusNode = FocusNode();
+  final FocusNode _priceFocusNode = FocusNode();
+  late FocusNode _qtyFocusNode;
 
   late Future<List<Product>> futureProducts;
 
@@ -46,13 +47,13 @@ class _OrderItemFormState extends State<OrderItemForm> {
   bool isBroker = false;
   String searchText = '';
   Product? selectedProduct;
+  String selectionName = '';
 
   @override
   void initState() {
     super.initState();
+    _qtyFocusNode = FocusNode();
     futureProducts = ProductService.filterProductLimited("", 5);
-    _descriptionFocusNode = FocusNode();
-    _priceFocusNode = FocusNode();
     costController.addListener(() => setState(() {
       cost = double.tryParse(costController.text) ?? 0;
       margin = ((price - cost) / price) * 100;
@@ -68,6 +69,7 @@ class _OrderItemFormState extends State<OrderItemForm> {
 
   @override
   void dispose() {
+    _qtyFocusNode.dispose();
     descriptionController.dispose();
     costController.dispose();
     qtyController.dispose();
@@ -120,14 +122,13 @@ class _OrderItemFormState extends State<OrderItemForm> {
   }
 
   void _onProductSelected(Product product) {
-    setState(() {
-      descriptionController.text = product.name;
-      costController.text = removeDecimalZeroFormat(product.cost).toString();
-      priceController.text = removeDecimalZeroFormat(product.price).toString();
-      qtyController.text = 1.toString();
-      selectedProduct = product;
-    });
-    _priceFocusNode.requestFocus();
+    descriptionController.text = product.name;
+    costController.text = removeDecimalZeroFormat(product.cost).toString();
+    priceController.text = removeDecimalZeroFormat(product.price).toString();
+    qtyController.text = 1.toString();
+    selectedProduct = product;
+    selectionName = product.name;
+    _qtyFocusNode.requestFocus();
   }
 
   void _onSearch(String text) {
@@ -199,19 +200,21 @@ class _OrderItemFormState extends State<OrderItemForm> {
                         case ConnectionState.active:
                         case ConnectionState.done:
                           if (snapshot.hasError) {
-                            return DropdownMenuDebounced(onSearch: (text) {}, list: [], isLoading: true,);
+                            return DropdownMenuDebounced(onSearch: (text) {}, list: [], isLoading: false,);
                           } else {
                             products = snapshot.data!;
 
                             return DropdownMenuDebounced(
                               onSearch: _onSearch,
                               hintText: 'Product',
-                              onChanged: (text) => searchText = text,
+                              onChanged: (text) {
+                                searchText = text;
+                              },
                               onSelected: (index) {
                                 _onProductSelected(products[index]);
                               },
                               list: products.map((p) => p.name).toList(),
-                              hasSelection: selectedProduct?.name,
+                              hasSelection: selectionName,
                             );
                           }
                       }
@@ -246,6 +249,7 @@ class _OrderItemFormState extends State<OrderItemForm> {
                   child: TextField(
                     keyboardType: TextInputType.number,
                     controller: qtyController,
+                    focusNode: _qtyFocusNode,
                     decoration: InputDecoration(
                       hintText: 'Qty'
                     ),
@@ -257,6 +261,7 @@ class _OrderItemFormState extends State<OrderItemForm> {
                   child: TextField(
                     keyboardType: TextInputType.number,
                     controller: priceController,
+                    focusNode: _priceFocusNode,
                     decoration: InputDecoration(
                       hintText: 'Price',
                       helper: marginHelperText(),
