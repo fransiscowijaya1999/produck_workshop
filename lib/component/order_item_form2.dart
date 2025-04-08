@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:produck_workshop/component/order_list.dart';
-import 'package:produck_workshop/component/product_dropdown_future.dart';
+import 'package:produck_workshop/component/product_dropdown.dart';
 import 'package:produck_workshop/model/product.dart';
 import 'package:produck_workshop/schema/order.dart';
+import 'package:produck_workshop/services/product.dart';
 
 enum FormSubmitAction { create, update }
 
-class OrderItemForm extends StatefulWidget {
-  const OrderItemForm({
+class OrderItemForm2 extends StatefulWidget {
+  const OrderItemForm2({
     super.key,
     this.order,
     this.formState = CreateFormState.order,
@@ -24,19 +25,21 @@ class OrderItemForm extends StatefulWidget {
   final VoidCallback? onCancel;
 
   @override
-  State<OrderItemForm> createState() => _OrderItemFormState();
+  State<OrderItemForm2> createState() => _OrderItemForm2State();
 }
 
-class _OrderItemFormState extends State<OrderItemForm> {
+class _OrderItemForm2State extends State<OrderItemForm2> {
+  final productController = TextEditingController();
   final descriptionController = TextEditingController();
   final costController = TextEditingController();
   final qtyController = TextEditingController();
   final priceController = TextEditingController();
-  final FocusNode _productFocusNode = FocusNode();
   final FocusNode _keyboardFocusNode = FocusNode();
   final FocusNode _descriptionFocusNode = FocusNode();
   final FocusNode _priceFocusNode = FocusNode();
   late FocusNode _qtyFocusNode;
+  late Future<List<Product>> productsFuture;
+  late List<Product> productList;
 
   late double price;
   late double cost;
@@ -48,6 +51,8 @@ class _OrderItemFormState extends State<OrderItemForm> {
   @override
   void initState() {
     super.initState();
+    productList = [];
+    productsFuture = ProductService.filterProductLimited('', 5);
     _qtyFocusNode = FocusNode();
     costController.addListener(() => setState(() {
       cost = double.tryParse(costController.text) ?? 0;
@@ -69,11 +74,18 @@ class _OrderItemFormState extends State<OrderItemForm> {
     costController.dispose();
     qtyController.dispose();
     priceController.dispose();
-    _productFocusNode.dispose();
     _keyboardFocusNode.dispose();
     _descriptionFocusNode.dispose();
     _priceFocusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> _onSearch(text) async {
+    setState(() {
+      productsFuture = ProductService.filterProductLimited(text, 5);
+    });
+
+    productList = await productsFuture;
   }
 
   String removeDecimalZeroFormat(double n) {
@@ -104,7 +116,7 @@ class _OrderItemFormState extends State<OrderItemForm> {
         isBroker = false;
       });
 
-      _productFocusNode.requestFocus();
+      productFocusNode.requestFocus();
     }
   }
 
@@ -179,7 +191,12 @@ class _OrderItemFormState extends State<OrderItemForm> {
               children: [
                 Expanded(
                   flex: 2,
-                  child: Text('')
+                  child: ProductDropdown(
+                    products: productList,
+                    future: productsFuture,
+                    onSearch: _onSearch,
+                    onSelected: _onProductSelected,
+                  )
                 ),
                 SizedBox(width: 10,),
                 Expanded(

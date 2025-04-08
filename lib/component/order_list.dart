@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:produck_workshop/component/order_item.dart';
-import 'package:produck_workshop/component/order_item_form.dart';
+import 'package:produck_workshop/component/order_item_form2.dart';
 import 'package:produck_workshop/schema/order.dart';
 
 enum CreateFormState { order, group, off }
@@ -204,7 +204,7 @@ class _OrderListState extends State<OrderList> {
               ),
             )
             :
-            OrderItemForm(
+            OrderItemForm2(
               formState: createFormState,
               submitAction: FormSubmitAction.create,
               onSubmit: _onSubmit,

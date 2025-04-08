@@ -1,5 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:produck_workshop/http/client.dart';
 import 'package:produck_workshop/model/product.dart';
+
+late FocusNode productFocusNode;
 
 class ProductService {
   static Future<List<Product>> filterProductLimited(String keyword, int limit) async {
@@ -11,7 +14,11 @@ class ProductService {
         });
 
       if (response.statusCode == 200) {
-        return Product.fromJsonList(response.data['payload']);
+        if (response.data['payload'] != null) {
+          return Product.fromJsonList(response.data['payload']);
+        } else {
+          return [];
+        }
       } else if (response.statusCode == 401) {
         throw Exception('Unauthenticated');
       } else {
