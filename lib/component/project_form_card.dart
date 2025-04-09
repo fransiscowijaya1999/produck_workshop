@@ -3,7 +3,7 @@ import 'package:produck_workshop/component/payment_history_dialog.dart';
 import 'package:produck_workshop/schema/payment.dart';
 import 'package:produck_workshop/util/project.dart';
 
-typedef SaveCallback = void Function(String label, String vehicle, String date);
+typedef SaveCallback = void Function(String label, String vehicle, String date, String memo);
 
 class ProjectFormCard extends StatefulWidget {
   const ProjectFormCard({
@@ -11,6 +11,7 @@ class ProjectFormCard extends StatefulWidget {
     this.label = '',
     this.vehicle = '',
     this.date = '',
+    this.memo = '',
     this.totalPrice = 0,
     this.paid = 0,
     this.paymentCount = 0,
@@ -25,6 +26,7 @@ class ProjectFormCard extends StatefulWidget {
   final String label;
   final String vehicle;
   final String date;
+  final String memo;
   final double totalPrice;
   final double paid;
   final int paymentCount;
@@ -43,6 +45,7 @@ class _ProjectFormCardState extends State<ProjectFormCard> {
   late TextEditingController labelController;
   late TextEditingController vehicleController;
   late TextEditingController dateController;
+  late TextEditingController memoController;
 
   @override
   void initState() {
@@ -50,6 +53,7 @@ class _ProjectFormCardState extends State<ProjectFormCard> {
     labelController = TextEditingController();
     vehicleController = TextEditingController();
     dateController = TextEditingController();
+    memoController = TextEditingController();
   }
 
   @override
@@ -57,6 +61,7 @@ class _ProjectFormCardState extends State<ProjectFormCard> {
     labelController.dispose();
     vehicleController.dispose();
     dateController.dispose();
+    memoController.dispose();
     super.dispose();
   }
 
@@ -106,6 +111,13 @@ class _ProjectFormCardState extends State<ProjectFormCard> {
                         controller: dateController..text = widget.date.toString(),
                         decoration: InputDecoration(
                           labelText: 'Date'
+                        ),
+                      ),
+                      TextField(
+                        controller: memoController..text = widget.memo,
+                        maxLines: 3,
+                        decoration: InputDecoration(
+                          labelText: 'Memo'
                         ),
                       )
                     ],
@@ -157,7 +169,7 @@ class _ProjectFormCardState extends State<ProjectFormCard> {
                 Row(
                   children: [
                     ElevatedButton(
-                      onPressed: widget.onSave != null && !widget.isSaving ? () { widget.onSave!(labelController.text, vehicleController.text, dateController.text); } : null,
+                      onPressed: widget.onSave != null && !widget.isSaving ? () { widget.onSave!(labelController.text, vehicleController.text, dateController.text, memoController.text); } : null,
                       child: widget.isSaving ? const SizedBox(height: 5, child: CircularProgressIndicator()) : const Text('Save')
                     ),
                     SizedBox(width: 10,),

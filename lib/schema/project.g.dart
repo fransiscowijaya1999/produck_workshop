@@ -37,20 +37,25 @@ const ProjectSchema = CollectionSchema(
       name: r'label',
       type: IsarType.string,
     ),
-    r'orders': PropertySchema(
+    r'memo': PropertySchema(
       id: 4,
+      name: r'memo',
+      type: IsarType.string,
+    ),
+    r'orders': PropertySchema(
+      id: 5,
       name: r'orders',
       type: IsarType.objectList,
       target: r'Order',
     ),
     r'payments': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'payments',
       type: IsarType.objectList,
       target: r'Payment',
     ),
     r'vehicle': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'vehicle',
       type: IsarType.string,
     )
@@ -76,6 +81,7 @@ int _projectEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.label.length * 3;
+  bytesCount += 3 + object.memo.length * 3;
   bytesCount += 3 + object.orders.length * 3;
   {
     final offsets = allOffsets[Order]!;
@@ -106,19 +112,20 @@ void _projectSerialize(
   writer.writeBool(offsets[1], object.isPinned);
   writer.writeBool(offsets[2], object.isUploaded);
   writer.writeString(offsets[3], object.label);
+  writer.writeString(offsets[4], object.memo);
   writer.writeObjectList<Order>(
-    offsets[4],
+    offsets[5],
     allOffsets,
     OrderSchema.serialize,
     object.orders,
   );
   writer.writeObjectList<Payment>(
-    offsets[5],
+    offsets[6],
     allOffsets,
     PaymentSchema.serialize,
     object.payments,
   );
-  writer.writeString(offsets[6], object.vehicle);
+  writer.writeString(offsets[7], object.vehicle);
 }
 
 Project _projectDeserialize(
@@ -133,21 +140,22 @@ Project _projectDeserialize(
   object.isPinned = reader.readBool(offsets[1]);
   object.isUploaded = reader.readBool(offsets[2]);
   object.label = reader.readString(offsets[3]);
+  object.memo = reader.readString(offsets[4]);
   object.orders = reader.readObjectList<Order>(
-        offsets[4],
+        offsets[5],
         OrderSchema.deserialize,
         allOffsets,
         Order(),
       ) ??
       [];
   object.payments = reader.readObjectList<Payment>(
-        offsets[5],
+        offsets[6],
         PaymentSchema.deserialize,
         allOffsets,
         Payment(),
       ) ??
       [];
-  object.vehicle = reader.readString(offsets[6]);
+  object.vehicle = reader.readString(offsets[7]);
   return object;
 }
 
@@ -167,6 +175,8 @@ P _projectDeserializeProp<P>(
     case 3:
       return (reader.readString(offset)) as P;
     case 4:
+      return (reader.readString(offset)) as P;
+    case 5:
       return (reader.readObjectList<Order>(
             offset,
             OrderSchema.deserialize,
@@ -174,7 +184,7 @@ P _projectDeserializeProp<P>(
             Order(),
           ) ??
           []) as P;
-    case 5:
+    case 6:
       return (reader.readObjectList<Payment>(
             offset,
             PaymentSchema.deserialize,
@@ -182,7 +192,7 @@ P _projectDeserializeProp<P>(
             Payment(),
           ) ??
           []) as P;
-    case 6:
+    case 7:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -528,6 +538,136 @@ extension ProjectQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'label',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Project, Project, QAfterFilterCondition> memoEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'memo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Project, Project, QAfterFilterCondition> memoGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'memo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Project, Project, QAfterFilterCondition> memoLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'memo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Project, Project, QAfterFilterCondition> memoBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'memo',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Project, Project, QAfterFilterCondition> memoStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'memo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Project, Project, QAfterFilterCondition> memoEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'memo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Project, Project, QAfterFilterCondition> memoContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'memo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Project, Project, QAfterFilterCondition> memoMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'memo',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Project, Project, QAfterFilterCondition> memoIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'memo',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Project, Project, QAfterFilterCondition> memoIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'memo',
         value: '',
       ));
     });
@@ -902,6 +1042,18 @@ extension ProjectQuerySortBy on QueryBuilder<Project, Project, QSortBy> {
     });
   }
 
+  QueryBuilder<Project, Project, QAfterSortBy> sortByMemo() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'memo', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Project, Project, QAfterSortBy> sortByMemoDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'memo', Sort.desc);
+    });
+  }
+
   QueryBuilder<Project, Project, QAfterSortBy> sortByVehicle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'vehicle', Sort.asc);
@@ -977,6 +1129,18 @@ extension ProjectQuerySortThenBy
     });
   }
 
+  QueryBuilder<Project, Project, QAfterSortBy> thenByMemo() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'memo', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Project, Project, QAfterSortBy> thenByMemoDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'memo', Sort.desc);
+    });
+  }
+
   QueryBuilder<Project, Project, QAfterSortBy> thenByVehicle() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'vehicle', Sort.asc);
@@ -1017,6 +1181,13 @@ extension ProjectQueryWhereDistinct
     });
   }
 
+  QueryBuilder<Project, Project, QDistinct> distinctByMemo(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'memo', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Project, Project, QDistinct> distinctByVehicle(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1054,6 +1225,12 @@ extension ProjectQueryProperty
   QueryBuilder<Project, String, QQueryOperations> labelProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'label');
+    });
+  }
+
+  QueryBuilder<Project, String, QQueryOperations> memoProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'memo');
     });
   }
 

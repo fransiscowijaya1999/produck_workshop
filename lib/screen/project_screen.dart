@@ -60,7 +60,12 @@ class _ProjectScreenState extends State<ProjectScreen> {
     });
   }
 
-  Future<void> saveProject(String label, String vehicle, String date) async {
+  Future<void> saveProject(
+    String label,
+    String vehicle,
+    String date,
+    String memo
+  ) async {
     setState(() {
       isSaving = true;
     });
@@ -71,6 +76,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
       project.label = label;
       project.vehicle = vehicle;
       project.date = DateFormat('yyyy-MM-dd').parse(date);
+      project.memo = memo;
 
       await db.projects.put(project);
     });
@@ -163,6 +169,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
                           vehicle: project.vehicle,
                           date: DateFormat('yyyy-MM-dd').format(project.date),
                           totalPrice: getOrdersTotalPrice(project.orders),
+                          memo: project.memo,
                           paid: getProjectPaid(project.payments),
                           paymentCount: project.payments.length,
                           payments: project.payments,

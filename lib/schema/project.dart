@@ -9,6 +9,7 @@ class Project {
   Id id = Isar.autoIncrement;
   String label = '';
   String vehicle = '';
+  String memo = '';
   bool isPinned = false;
   bool isUploaded = false;
   late DateTime date;
