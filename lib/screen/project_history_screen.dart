@@ -28,21 +28,21 @@ class _ProjectHistoryScreenState extends State<ProjectHistoryScreen> {
   void initState() {
     super.initState();
     searchController.addListener(() {
+      Query<Project> projectsQuery = db.projects.where()
+        .filter()
+        .labelContains(searchController.text, caseSensitive: false)
+        .isUploadedEqualTo(true)
+        .sortByDateDesc()
+        .build();
+
       setState(() {
-        Query<Project> projectsQuery = db.projects.where()
-          .filter()
-          .labelContains(searchController.text, caseSensitive: false)
-          .isUploadedEqualTo(true)
-          .sortByDateDesc()
-          .build();
-
         projectsFuture = projectsQuery.findAll();
-
-        Stream<List<Project>> queryChanged = projectsQuery.watch();
-        _projectsStream = queryChanged.listen((projects) {
-          setState(() {
-            projectsFuture = projectsQuery.findAll();
-          });
+      });
+      
+      Stream<List<Project>> queryChanged = projectsQuery.watch();
+      _projectsStream = queryChanged.listen((projects) {
+        setState(() {
+          projectsFuture = projectsQuery.findAll();
         });
       });
     });
