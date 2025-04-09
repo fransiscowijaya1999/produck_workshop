@@ -11,13 +11,11 @@ class ProductDropdown extends StatefulWidget {
     super.key,
     required this.onSelected,
     required this.onSearch,
-    required this.products,
     required this.future
   });
 
   final ValueSetter<Product> onSelected;
   final ValueSetter<String> onSearch;
-  final List<Product> products;
   final Future<List<Product>> future;
 
   @override
@@ -54,7 +52,7 @@ class _ProductDropdownState extends State<ProductDropdown> {
   void moveSelection(int step) {
     final int afterStep = currentIndex + step;
 
-    if (afterStep >= 0 && afterStep < widget.products.length) {
+    if (afterStep >= 0 && afterStep < productList.length) {
       setState(() {
         currentIndex = currentIndex + step;
       });
@@ -70,7 +68,7 @@ class _ProductDropdownState extends State<ProductDropdown> {
         moveSelection(-1);
       }
       if (event.logicalKey == LogicalKeyboardKey.enter) {
-        final selected = widget.products[currentIndex];
+        final selected = productList[currentIndex];
         selectedProduct = selected;
         widget.onSelected(selected);
       }

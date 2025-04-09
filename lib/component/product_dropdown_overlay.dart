@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:produck_workshop/model/product.dart';
+import 'package:produck_workshop/services/product.dart';
 
 class ProductDropdownOverlay extends StatelessWidget {
   const ProductDropdownOverlay({
@@ -31,6 +32,14 @@ class ProductDropdownOverlay extends StatelessWidget {
               );
             } else {
               final products = snapshot.data!;
+              productList = products;
+
+              if (products.isEmpty) {
+                return Padding(
+                  padding: const EdgeInsets.all(15),
+                  child: Text('No product found'),
+                );
+              }
 
               return ListView.builder(
                 shrinkWrap: true,

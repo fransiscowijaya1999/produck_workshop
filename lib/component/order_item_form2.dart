@@ -39,7 +39,6 @@ class _OrderItemForm2State extends State<OrderItemForm2> {
   final FocusNode _priceFocusNode = FocusNode();
   late FocusNode _qtyFocusNode;
   late Future<List<Product>> productsFuture;
-  late List<Product> productList;
 
   late double price;
   late double cost;
@@ -51,7 +50,6 @@ class _OrderItemForm2State extends State<OrderItemForm2> {
   @override
   void initState() {
     super.initState();
-    productList = [];
     productsFuture = ProductService.filterProductLimited('', 5);
     _qtyFocusNode = FocusNode();
     costController.addListener(() => setState(() {
@@ -84,8 +82,6 @@ class _OrderItemForm2State extends State<OrderItemForm2> {
     setState(() {
       productsFuture = ProductService.filterProductLimited(text, 5);
     });
-
-    productList = await productsFuture;
   }
 
   String removeDecimalZeroFormat(double n) {
@@ -192,7 +188,6 @@ class _OrderItemForm2State extends State<OrderItemForm2> {
                 Expanded(
                   flex: 2,
                   child: ProductDropdown(
-                    products: productList,
                     future: productsFuture,
                     onSearch: _onSearch,
                     onSelected: _onProductSelected,
