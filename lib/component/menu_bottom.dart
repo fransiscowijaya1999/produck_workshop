@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:produck_workshop/screen/api_setting_screen.dart';
+import 'package:produck_workshop/screen/project_history_screen.dart';
 
 class MenuBottom extends StatelessWidget {
   const MenuBottom({
@@ -14,9 +15,15 @@ class MenuBottom extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProjectHistoryScreen())
+              );
+            },
             child: Icon(Icons.history),
           ),
+          SizedBox(width: 10,),
           TextButton(
             onPressed: () {
               Navigator.push(

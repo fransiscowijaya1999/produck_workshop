@@ -31,9 +31,9 @@ class Worklist extends StatelessWidget {
     return SizedBox(
       width: 250,
       child: ListView.builder(
-        itemCount: worklist.length + 1,
+        itemCount: onCreate != null ? worklist.length + 1 : worklist.length,
         itemBuilder: (_, index) {
-          if (index == worklist.length) {
+          if (index == worklist.length && onCreate != null) {
             return ListTile(
               title: Icon(Icons.add),
               onTap: onCreate
@@ -97,10 +97,10 @@ class WorklistTile extends StatelessWidget {
       horizontalTitleGap: 5,
       selected: isSelected,
       selectedTileColor: Colors.black.withAlpha(15),
-      trailing: TextButton.icon(
+      trailing: onPin != null ? TextButton.icon(
         onPressed: onPin,
         label: project.isPinned ? Icon(Icons.star) : Icon(Icons.star_border),
-      ),
+      ) : null,
     );
   }
 }
