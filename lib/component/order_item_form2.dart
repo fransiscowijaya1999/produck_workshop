@@ -34,6 +34,7 @@ class _OrderItemForm2State extends State<OrderItemForm2> {
   late TextEditingController costController;
   late TextEditingController qtyController;
   late TextEditingController priceController;
+  final FocusNode _productFocusNode = FocusNode();
   final FocusNode _keyboardFocusNode = FocusNode();
   final FocusNode _descriptionFocusNode = FocusNode();
   final FocusNode _priceFocusNode = FocusNode();
@@ -84,6 +85,7 @@ class _OrderItemForm2State extends State<OrderItemForm2> {
 
   @override
   void dispose() {
+    _productFocusNode.dispose();
     _qtyFocusNode.dispose();
     descriptionController.dispose();
     costController.dispose();
@@ -129,7 +131,7 @@ class _OrderItemForm2State extends State<OrderItemForm2> {
         isBroker = false;
       });
 
-      productFocusNode.requestFocus();
+      _productFocusNode.requestFocus();
     }
   }
 
@@ -208,6 +210,7 @@ class _OrderItemForm2State extends State<OrderItemForm2> {
                     initProduct: selectedProduct,
                     future: productsFuture,
                     onSearch: _onSearch,
+                    focusNode: _productFocusNode,
                     onSelected: _onProductSelected,
                   )
                 ),

@@ -12,12 +12,14 @@ class ProductDropdown extends StatefulWidget {
     required this.onSelected,
     required this.onSearch,
     required this.future,
+    required this.focusNode,
     this.initProduct
   });
 
   final ValueSetter<Product> onSelected;
   final ValueSetter<String> onSearch;
   final Future<List<Product>> future;
+  final FocusNode focusNode;
   final Product? initProduct;
 
   @override
@@ -86,9 +88,8 @@ class _ProductDropdownState extends State<ProductDropdown> {
     WidgetsBinding.instance.addPostFrameCallback((_) => initPosition());
 
     keyboardFocusNode = FocusNode();
-    productFocusNode = FocusNode();
-    productFocusNode.addListener(() {
-      if (productFocusNode.hasFocus) {
+    widget.focusNode.addListener(() {
+      if (widget.focusNode.hasFocus) {
         if (selectedProduct != null) {
           productController.text = '';
         }
@@ -101,7 +102,6 @@ class _ProductDropdownState extends State<ProductDropdown> {
       productsOverlayController.toggle();
     });
 
-
     productController.addListener(() {
       _onSearchChanged(productController.text);
     });
@@ -111,7 +111,6 @@ class _ProductDropdownState extends State<ProductDropdown> {
   void dispose() {
     productController.dispose();
     _debounce?.cancel();
-    productFocusNode.dispose();
     keyboardFocusNode.dispose();
     super.dispose();
   }
@@ -149,7 +148,7 @@ class _ProductDropdownState extends State<ProductDropdown> {
               child: TextField(
                 autofocus: true,
                 controller: productController,
-                focusNode: productFocusNode,
+                focusNode: widget.focusNode,
               ),
             ),
           ),

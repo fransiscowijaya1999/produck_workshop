@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:produck_workshop/component/order_list.dart';
-import 'package:produck_workshop/component/product_dropdown_future.dart';
 import 'package:produck_workshop/model/product.dart';
 import 'package:produck_workshop/schema/order.dart';
 
@@ -119,14 +118,14 @@ class _OrderItemFormState extends State<OrderItemForm> {
     }
   }
 
-  void _onProductSelected(Product product) {
-    selectedProduct = product;
-    descriptionController.text = product.name;
-    costController.text = removeDecimalZeroFormat(product.cost).toString();
-    priceController.text = removeDecimalZeroFormat(product.price).toString();
-    qtyController.text = 1.toString();
-    _qtyFocusNode.requestFocus();
-  }
+  // void _onProductSelected(Product product) {
+  //   selectedProduct = product;
+  //   descriptionController.text = product.name;
+  //   costController.text = removeDecimalZeroFormat(product.cost).toString();
+  //   priceController.text = removeDecimalZeroFormat(product.price).toString();
+  //   qtyController.text = 1.toString();
+  //   _qtyFocusNode.requestFocus();
+  // }
 
   Text marginHelperText() {
     Color textColor = margin >= 10 ? Colors.green : (margin <= 0 ? Colors.red : Colors.orange);

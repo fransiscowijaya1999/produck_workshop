@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:produck_workshop/http/client.dart';
 import 'package:produck_workshop/model/product.dart';
 
-late FocusNode productFocusNode;
 List<Product> productList = [];
 
 class ProductService {
