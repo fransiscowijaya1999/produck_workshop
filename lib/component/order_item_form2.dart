@@ -51,7 +51,7 @@ class _OrderItemForm2State extends State<OrderItemForm2> {
   void initState() {
     super.initState();
 
-    if (widget.order != null) {
+    if (widget.order != null && widget.formState == CreateFormState.order) {
       final initProduct = Product(
         id: widget.order!.productId!,
         name: widget.order!.description,
