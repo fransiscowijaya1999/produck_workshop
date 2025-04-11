@@ -30,6 +30,12 @@ class _OrderListState extends State<OrderList> {
     }
   }
 
+  Future<void> _onUpdate(Order order) async {
+    if (widget.onSubmit != null) {
+      await widget.onSubmit!(widget.orders);
+    }
+  }
+
   Future<void> _onSubmitGroup(Order order) async {
     if (widget.onSubmit != null) {
       await widget.onSubmit!(widget.orders);
@@ -129,6 +135,8 @@ class _OrderListState extends State<OrderList> {
                   onChanged: null
                 ),
               ),
+              SizedBox(width: 50, child: Center(child: Icon(Icons.edit, size: 15,))),
+              SizedBox(width: 10,),
               Expanded(
                 flex: 5,
                 child: Text('Description')
@@ -168,6 +176,7 @@ class _OrderListState extends State<OrderList> {
                 isChecked: _selectedOrder.contains(order),
                 onChecked: onChecked,
                 onSubmit: _onSubmitGroup,
+                onUpdate: _onUpdate,
               );
             },
             onReorder: (int oldIndex, int newIndex) {

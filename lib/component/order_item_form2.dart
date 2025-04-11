@@ -29,11 +29,11 @@ class OrderItemForm2 extends StatefulWidget {
 }
 
 class _OrderItemForm2State extends State<OrderItemForm2> {
-  final productController = TextEditingController();
-  final descriptionController = TextEditingController();
-  final costController = TextEditingController();
-  final qtyController = TextEditingController();
-  final priceController = TextEditingController();
+  late TextEditingController productController;
+  late TextEditingController descriptionController;
+  late TextEditingController costController;
+  late TextEditingController qtyController;
+  late TextEditingController priceController;
   final FocusNode _keyboardFocusNode = FocusNode();
   final FocusNode _descriptionFocusNode = FocusNode();
   final FocusNode _priceFocusNode = FocusNode();
@@ -50,6 +50,23 @@ class _OrderItemForm2State extends State<OrderItemForm2> {
   @override
   void initState() {
     super.initState();
+
+    if (widget.order != null) {
+      final initProduct = Product(
+        id: widget.order!.productId!,
+        name: widget.order!.description,
+        price: widget.order!.price,
+        cost: widget.order!.cost
+      );
+      selectedProduct = initProduct;
+    }
+
+    productController = TextEditingController()..text = widget.order?.description ?? '';
+    descriptionController = TextEditingController()..text = widget.order?.description ?? '';
+    costController = TextEditingController()..text = removeDecimalZeroFormat(widget.order?.cost ?? 0);
+    qtyController = TextEditingController()..text = widget.order?.qty.toString() ?? '';
+    priceController = TextEditingController()..text = removeDecimalZeroFormat(widget.order?.price ?? 0);
+
     productsFuture = ProductService.filterProductLimited('', 5);
     _qtyFocusNode = FocusNode();
     costController.addListener(() => setState(() {
@@ -188,6 +205,7 @@ class _OrderItemForm2State extends State<OrderItemForm2> {
                 Expanded(
                   flex: 2,
                   child: ProductDropdown(
+                    initProduct: selectedProduct,
                     future: productsFuture,
                     onSearch: _onSearch,
                     onSelected: _onProductSelected,

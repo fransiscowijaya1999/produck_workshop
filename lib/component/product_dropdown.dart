@@ -11,12 +11,14 @@ class ProductDropdown extends StatefulWidget {
     super.key,
     required this.onSelected,
     required this.onSearch,
-    required this.future
+    required this.future,
+    this.initProduct
   });
 
   final ValueSetter<Product> onSelected;
   final ValueSetter<String> onSearch;
   final Future<List<Product>> future;
+  final Product? initProduct;
 
   @override
   State<ProductDropdown> createState() => _ProductDropdownState();
@@ -78,6 +80,9 @@ class _ProductDropdownState extends State<ProductDropdown> {
   @override
   void initState() {
     super.initState();
+    if (widget.initProduct != null) {
+      selectedProduct = widget.initProduct!;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) => initPosition());
 
     keyboardFocusNode = FocusNode();

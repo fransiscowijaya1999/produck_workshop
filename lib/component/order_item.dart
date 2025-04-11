@@ -1,39 +1,86 @@
 import 'package:flutter/material.dart';
+import 'package:produck_workshop/component/order_item_form2.dart';
 import 'package:produck_workshop/component/order_list.dart';
 import 'package:produck_workshop/schema/order.dart';
 import 'package:produck_workshop/util/project.dart';
 
-class OrderItem extends StatelessWidget {
+class OrderItem extends StatefulWidget {
   const OrderItem({
     super.key,
     required this.order,
     this.isChecked = false,
     this.onChecked,
-    this.onSubmit
+    this.onSubmit,
+    this.onUpdate
   });
 
   final Order order;
   final bool isChecked;
   final ValueSetter<Order>? onChecked;
   final Future Function(Order)? onSubmit;
+  final Future Function(Order)? onUpdate;
+
+  @override
+  State<OrderItem> createState() => _OrderItemState();
+}
+
+class _OrderItemState extends State<OrderItem> {
+  bool isEditing = false;
+
+  void _onEdit() {
+    setState(() {
+      isEditing = true;
+    });
+  }
+
+  void _onCancelEdit() {
+    setState(() {
+      isEditing = false;
+    });
+  }
+
+  Future<void> _onUpdate(Order newOrder) async {
+    if (widget.onUpdate != null) {
+      widget.order.productId = newOrder.productId;
+      widget.order.description = newOrder.description;
+      widget.order.cost = newOrder.cost;
+      widget.order.qty = newOrder.qty;
+      widget.order.price = newOrder.price;
+
+      widget.onUpdate!(newOrder);
+    }
+
+    setState(() {
+      isEditing = false;
+    });
+  }
 
   Future<void> _onSubmitGroup(List<Order> newOrders) async {
-    if (onSubmit != null && order.isGroup) {
-      order.orders = newOrders;
-      onSubmit!(order);
+    if (widget.onSubmit != null && widget.order.isGroup) {
+      widget.order.orders = newOrders;
+      widget.onSubmit!(widget.order);
     }
   }
 
   Future<void> _onQtyIncrement() async {
-    if (onSubmit != null) {
-      order.qty += 1;
-      onSubmit!(order);
+    if (widget.onSubmit != null) {
+      widget.order.qty += 1;
+      widget.onSubmit!(widget.order);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (order.isGroup) {
+    if (isEditing) {
+      return OrderItemForm2(
+        order: widget.order,
+        formState: widget.order.isGroup ? CreateFormState.group : CreateFormState.order,
+        submitAction: FormSubmitAction.update,
+        onCancel: _onCancelEdit,
+        onSubmit: _onUpdate,
+      );
+    }
+    if (widget.order.isGroup) {
       return ExpansionTile(
         controlAffinity: ListTileControlAffinity.leading,
         minTileHeight: 0,
@@ -46,23 +93,31 @@ class OrderItem extends StatelessWidget {
             SizedBox(
               width: 50,
               child: Checkbox(
-                value: isChecked,
-                onChanged: onChecked != null ? (checkStatus) => onChecked!(order) : null
+                value: widget.isChecked,
+                onChanged: widget.onChecked != null ? (checkStatus) => widget.onChecked!(widget.order) : null
               ),
             ),
+            SizedBox(
+              width: 50,
+              child: TextButton(
+                onPressed: _onEdit,
+                child: Icon(Icons.edit),
+              )
+            ),
+            SizedBox(width: 10,),
             Expanded(
               flex: 12,
-              child: Text(order.description)
+              child: Text(widget.order.description)
             ),
             Expanded(
               flex: 2,
-              child: Text('Rp${removeDecimalZeroFormat(getOrdersTotalPrice(order.orders))}'),
+              child: Text('Rp${removeDecimalZeroFormat(getOrdersTotalPrice(widget.order.orders))}'),
             )
           ],
         ),
         children: [
           OrderList(
-            orders: order.orders ?? [],
+            orders: widget.order.orders ?? [],
             onSubmit: _onSubmitGroup,
           )
         ],
@@ -70,7 +125,7 @@ class OrderItem extends StatelessWidget {
     }
 
     return ListTile(
-      tileColor: order.isBroker ? Colors.amber : null,
+      tileColor: widget.order.isBroker ? Colors.amber : null,
       contentPadding: EdgeInsets.all(0),
       minVerticalPadding: 0,
       horizontalTitleGap: 5,
@@ -80,17 +135,25 @@ class OrderItem extends StatelessWidget {
           SizedBox(
             width: 50,
             child: Checkbox(
-              value: isChecked,
-              onChanged: onChecked != null ? (checkStatus) => onChecked!(order) : null
+              value: widget.isChecked,
+              onChanged: widget.onChecked != null ? (checkStatus) => widget.onChecked!(widget.order) : null
             ),
           ),
+          SizedBox(
+            width: 50,
+            child: TextButton(
+              onPressed: _onEdit,
+              child: Icon(Icons.edit),
+            )
+          ),
+          SizedBox(width: 10,),
           Expanded(
             flex: 5,
-            child: Text(order.description)
+            child: Text(widget.order.description)
           ),
           Expanded(
             flex: 1,
-            child: Text('Rp${removeDecimalZeroFormat(order.cost)}',
+            child: Text('Rp${removeDecimalZeroFormat(widget.order.cost)}',
               style: TextStyle(
                 color: Colors.black54
               ),
@@ -104,7 +167,7 @@ class OrderItem extends StatelessWidget {
                 onPressed: _onQtyIncrement,
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Text('${order.qty}',
+                  child: Text('${widget.order.qty}',
                     style: TextStyle(
                       fontWeight: FontWeight.bold
                     ),
@@ -116,11 +179,11 @@ class OrderItem extends StatelessWidget {
           ),
           Expanded(
             flex: 1,
-            child: Text('Rp${removeDecimalZeroFormat(order.price)}'),
+            child: Text('Rp${removeDecimalZeroFormat(widget.order.price)}'),
           ),
           Expanded(
             flex: 2,
-            child: Text('Rp${removeDecimalZeroFormat(order.qty * order.price)}',
+            child: Text('Rp${removeDecimalZeroFormat(widget.order.qty * widget.order.price)}',
               style: TextStyle(),
             ),
           )
