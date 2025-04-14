@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:produck_workshop/screen/api_setting_screen.dart';
 import 'package:produck_workshop/screen/project_history_screen.dart';
+import 'package:produck_workshop/services/pos.dart';
 
 class MenuBottom extends StatelessWidget {
   const MenuBottom({
@@ -32,7 +33,12 @@ class MenuBottom extends StatelessWidget {
               );
             },
             child: Icon(Icons.settings)
-          )
+          ),
+          SizedBox(width: 10,),
+          TextButton(
+            onPressed: () => PosService.submitOrder([]),
+            child: Icon(Icons.bug_report)
+          ),
         ],
       ),
     );

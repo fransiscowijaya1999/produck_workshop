@@ -30,3 +30,31 @@ class Pos {
     return posList;
   }
 }
+
+class Transaction {
+  final int posId;
+  final int userId;
+  final DateTime createdAt;
+  final List<TransactionItem> items;
+
+  const Transaction({
+    required this.posId,
+    required this.userId,
+    required this.createdAt,
+    this.items = const [],
+  });
+}
+
+class TransactionItem {
+  final double price;
+  final double cost;
+  final int qty;
+  final int productId;
+
+  const TransactionItem({
+    required this.price,
+    required this.cost,
+    required this.qty,
+    required this.productId
+  });
+}
