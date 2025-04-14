@@ -85,7 +85,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
     });
   }
 
-  Future<void> createPayment(DateTime date, double amount) async {
+  Future<void> createPayment(DateTime date, double amount, {bool isUpfront = false}) async {
     final db = DatabaseService.db;
     await db.writeTxn(() async {
       final project = (await db.projects.get(widget.projectId))!;
@@ -93,11 +93,11 @@ class _ProjectScreenState extends State<ProjectScreen> {
       final remainingPayment = getOrdersTotalPrice(project.orders) - getProjectPaid(project.payments);
       final paid = amount > remainingPayment ? remainingPayment : amount;
 
-      if (amount >= remainingPayment) {
+      if (amount >= remainingPayment && isUpfront == false) {
         project.isUploaded = true;
       }
       payment.date = date;
-      payment.amount = paid;
+      payment.amount = isUpfront ? amount : paid;
       
       project.payments = [...project.payments, payment];
 
@@ -115,6 +115,22 @@ class _ProjectScreenState extends State<ProjectScreen> {
           return PaymentDialog(
             remainingPayment: getOrdersTotalPrice(project.orders) - getProjectPaid(project.payments),
             onSubmit: (date, amount) async => await createPayment(date, amount),
+          );
+        }
+      );
+    }
+  }
+
+  Future<void> _upfrontDialogBuilder(BuildContext context) async {
+    final project = (await db.projects.get(widget.projectId))!;
+
+    if (context.mounted) {
+      return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return PaymentDialog(
+            remainingPayment: getOrdersTotalPrice(project.orders) - getProjectPaid(project.payments),
+            onSubmit: (date, amount) async => await createPayment(date, amount, isUpfront: true),
           );
         }
       );
@@ -176,6 +192,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
                           onSave: saveProject,
                           onDelete: deleteProject,
                           onPayment: () => _paymentDialogBuilder(context),
+                          onUpfront: () => _upfrontDialogBuilder(context),
                           isSaving: isSaving,
                           isUploaded: project.isUploaded,
                         ),

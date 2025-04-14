@@ -78,7 +78,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
             final amount = double.parse(amountController.text);
             final paid = amount > widget.remainingPayment ? widget.remainingPayment : amount;
 
-            await widget.onSubmit!(DateFormat('yyyy-MM-dd').parse(dateController.text), paid);
+            await widget.onSubmit!(DateFormat('yyyy-MM-dd').parse(dateController.text), amount);
             if (context.mounted) {
               Navigator.of(context).pop();
             }

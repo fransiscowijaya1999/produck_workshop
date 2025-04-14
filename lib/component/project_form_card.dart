@@ -19,6 +19,7 @@ class ProjectFormCard extends StatefulWidget {
     this.onSave,
     this.onDelete,
     this.onPayment,
+    this.onUpfront,
     this.isSaving = false,
     this.isUploaded = false,
   });
@@ -34,6 +35,7 @@ class ProjectFormCard extends StatefulWidget {
   final SaveCallback? onSave;
   final VoidCallback? onDelete;
   final VoidCallback? onPayment;
+  final VoidCallback? onUpfront;
   final bool isSaving;
   final bool isUploaded;
 
@@ -176,6 +178,11 @@ class _ProjectFormCardState extends State<ProjectFormCard> {
                     ElevatedButton(
                       onPressed: widget.paid >= widget.totalPrice ? null : widget.onPayment,
                       child: Text('Payment')
+                    ),
+                    SizedBox(width: 50,),
+                    ElevatedButton(
+                      onPressed: widget.onUpfront,
+                      child: Text('Upfront')
                     ),
                     if (widget.isUploaded)
                       ...[
