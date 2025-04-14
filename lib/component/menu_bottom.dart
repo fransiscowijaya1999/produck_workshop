@@ -4,9 +4,7 @@ import 'package:produck_workshop/screen/project_history_screen.dart';
 import 'package:produck_workshop/services/pos.dart';
 
 class MenuBottom extends StatelessWidget {
-  const MenuBottom({
-    super.key
-  });
+  const MenuBottom({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,25 +17,24 @@ class MenuBottom extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const ProjectHistoryScreen())
+                MaterialPageRoute(
+                  builder: (context) => const ProjectHistoryScreen(),
+                ),
               );
             },
             child: Icon(Icons.history),
           ),
-          SizedBox(width: 10,),
+          SizedBox(width: 10),
           TextButton(
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const ApiSettingScreen())
+                MaterialPageRoute(
+                  builder: (context) => const ApiSettingScreen(),
+                ),
               );
             },
-            child: Icon(Icons.settings)
-          ),
-          SizedBox(width: 10,),
-          TextButton(
-            onPressed: () => PosService.submitOrder([]),
-            child: Icon(Icons.bug_report)
+            child: Icon(Icons.settings),
           ),
         ],
       ),

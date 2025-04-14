@@ -9,14 +9,11 @@ import 'package:produck_workshop/db.dart';
 import 'package:produck_workshop/schema/order.dart';
 import 'package:produck_workshop/schema/payment.dart';
 import 'package:produck_workshop/schema/project.dart';
+import 'package:produck_workshop/services/pos.dart';
 import 'package:produck_workshop/util/project.dart';
 
 class ProjectScreen extends StatefulWidget {
-  const ProjectScreen({
-    super.key,
-    required this.projectId,
-    this.onDeleted
-  });
+  const ProjectScreen({super.key, required this.projectId, this.onDeleted});
 
   final int projectId;
   final VoidCallback? onDeleted;
@@ -64,7 +61,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
     String label,
     String vehicle,
     String date,
-    String memo
+    String memo,
   ) async {
     setState(() {
       isSaving = true;
@@ -85,20 +82,27 @@ class _ProjectScreenState extends State<ProjectScreen> {
     });
   }
 
-  Future<void> createPayment(DateTime date, double amount, {bool isUpfront = false}) async {
+  Future<void> createPayment(
+    DateTime date,
+    double amount, {
+    bool isUpfront = false,
+  }) async {
     final db = DatabaseService.db;
     await db.writeTxn(() async {
       final project = (await db.projects.get(widget.projectId))!;
       final payment = Payment();
-      final remainingPayment = getOrdersTotalPrice(project.orders) - getProjectPaid(project.payments);
+      final remainingPayment =
+          getOrdersTotalPrice(project.orders) -
+          getProjectPaid(project.payments);
       final paid = amount > remainingPayment ? remainingPayment : amount;
 
       if (amount >= remainingPayment && isUpfront == false) {
         project.isUploaded = true;
+        await PosService.submitOrder(project.orders);
       }
       payment.date = date;
       payment.amount = isUpfront ? amount : paid;
-      
+
       project.payments = [...project.payments, payment];
 
       await db.projects.put(project);
@@ -113,10 +117,12 @@ class _ProjectScreenState extends State<ProjectScreen> {
         context: context,
         builder: (BuildContext context) {
           return PaymentDialog(
-            remainingPayment: getOrdersTotalPrice(project.orders) - getProjectPaid(project.payments),
+            remainingPayment:
+                getOrdersTotalPrice(project.orders) -
+                getProjectPaid(project.payments),
             onSubmit: (date, amount) async => await createPayment(date, amount),
           );
-        }
+        },
       );
     }
   }
@@ -129,14 +135,17 @@ class _ProjectScreenState extends State<ProjectScreen> {
         context: context,
         builder: (BuildContext context) {
           return PaymentDialog(
-            remainingPayment: getOrdersTotalPrice(project.orders) - getProjectPaid(project.payments),
-            onSubmit: (date, amount) async => await createPayment(date, amount, isUpfront: true),
+            remainingPayment:
+                getOrdersTotalPrice(project.orders) -
+                getProjectPaid(project.payments),
+            onSubmit:
+                (date, amount) async =>
+                    await createPayment(date, amount, isUpfront: true),
           );
-        }
+        },
       );
     }
   }
-
 
   Future<void> deleteProject() async {
     final db = DatabaseService.db;
@@ -196,24 +205,23 @@ class _ProjectScreenState extends State<ProjectScreen> {
                           isSaving: isSaving,
                           isUploaded: project.isUploaded,
                         ),
-                        SizedBox(
-                          height: 10
-                        ),
+                        SizedBox(height: 10),
                         OrderList(
                           orders: project.orders,
                           onSubmit: submitOrder,
-                        )
+                        ),
                       ],
                     ),
                   ),
                 );
               } else {
-                return const Center(child: Text('No data exist, could it be already deleted?'));
+                return const Center(
+                  child: Text('No data exist, could it be already deleted?'),
+                );
               }
             }
         }
       },
     );
-    
   }
 }

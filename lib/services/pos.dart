@@ -5,6 +5,30 @@ import 'package:produck_workshop/prefs.dart';
 import 'package:produck_workshop/schema/order.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+List<TransactionItem> generateTransactionItem(List<Order> orders) {
+  List<TransactionItem> transactionItems = [];
+
+  for (final item in orders) {
+    if (item.isGroup && item.orders != null) {
+      transactionItems = [
+        ...transactionItems,
+        ...generateTransactionItem(item.orders!),
+      ];
+    } else {
+      transactionItems.add(
+        TransactionItem(
+          price: item.price,
+          cost: item.cost,
+          qty: item.qty,
+          productId: item.productId!,
+        ),
+      );
+    }
+  }
+
+  return transactionItems;
+}
+
 class PosService {
   static Future<void> submitOrder(List<Order> orders) async {
     final SharedPreferencesAsync prefs = SharedPreferencesAsync();
@@ -12,42 +36,48 @@ class PosService {
     final String apiToken = await prefs.getString(prefsApi['API_TOKEN']!) ?? '';
     final jwt = JWT.decode(apiToken);
     final int userId = int.parse(jwt.payload['jti']);
-    
-    final List<TransactionItem> transactionItems = [];
+
+    List<TransactionItem> transactionItems = [
+      ...generateTransactionItem(orders),
+    ];
+
     final transaction = Transaction(
       posId: posId!,
       userId: userId,
       createdAt: DateTime.now(),
-      items: transactionItems
+      items: transactionItems,
     );
 
-    // await dio
-    //   .post('/orders', queryParameters: {
-    //     'posId': transaction.posId,
-    //     'createdAt': transaction.createdAt.toString(),
-    //     'userId': userId,
-    //     'items': _orderItemToJson(transaction.items)
-    //   });
+    final data = {
+      'posId': transaction.posId,
+      'userId': userId,
+      'items': _orderItemToJson(transaction.items),
+    };
+
+    await dio.post('/orders', data: data);
   }
 
-  static List<Map<String, dynamic>> _orderItemToJson(List<TransactionItem> items) {
-    return items.map((item) => {
-      'product': {
-        'id': item.productId
-      },
-      'cost': item.cost,
-      'price': item.price,
-      'qty': item.qty
-    }).toList();
+  static List<Map<String, dynamic>> _orderItemToJson(
+    List<TransactionItem> items,
+  ) {
+    return items
+        .map(
+          (item) => {
+            'product': {'id': item.productId},
+            'cost': item.cost,
+            'price': item.price,
+            'qty': item.qty,
+          },
+        )
+        .toList();
   }
-  
+
   static Future<List<Pos>> filterPos(String keyword, int limit) async {
     try {
-      final response = await dio
-        .get('/pos', queryParameters: {
-          'keyword': keyword,
-          'pageSize': limit
-        });
+      final response = await dio.get(
+        '/pos',
+        queryParameters: {'keyword': keyword, 'pageSize': limit},
+      );
 
       if (response.statusCode == 200) {
         if (response.data['payload'] != null) {
