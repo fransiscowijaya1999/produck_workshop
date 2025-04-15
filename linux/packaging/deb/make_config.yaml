@@ -1,0 +1,34 @@
+display_name: ProDuck Workshop
+package_name: produck-workshop
+
+maintainer:
+  name: Fransisco Wijaya
+  email: fransiscowijaya1999@gmail.com
+
+priority: optional
+
+section: x11
+
+installed_size: 15700
+
+# dependencies:
+#   - mpv
+
+essential: false
+
+# icon: linux/assets/apidash.png
+
+postuninstall_scripts:
+  - echo "Sorry to see you go."
+
+keywords:
+  - ProDuck
+  - ProDuck Workshop
+
+generic_name: Workshop Client
+
+categories:
+  - Parts
+  - Workshop
+
+startup_notify: true
