@@ -95,7 +95,23 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               SizedBox(height: 16,),
-              ElevatedButton(onPressed: () => login(context), child: Text('Login'))
+              ElevatedButton(onPressed: () => login(context), child: Text('Login')),
+              SizedBox(height: 16,),
+              ElevatedButton(onPressed: () async {
+                final SharedPreferencesAsync prefs = SharedPreferencesAsync();
+                await prefs.setString(prefsApi['API_TOKEN']!, '');
+                await prefs.setString(prefsApi['API_URL']!, '');
+                await prefs.remove(prefsApi['POS_ID']!);
+
+                if (context.mounted) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (BuildContext context) => startScreenGenerator(),
+                    ),
+                    ModalRoute.withName('/')
+                  );
+                }
+              }, child: Text('Set API Endpoint')),
             ],
           ),
         ),
