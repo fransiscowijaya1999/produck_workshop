@@ -15,14 +15,17 @@ List<TransactionItem> generateTransactionItem(List<Order> orders) {
         ...generateTransactionItem(item.orders!),
       ];
     } else {
-      transactionItems.add(
-        TransactionItem(
-          price: item.price,
-          cost: item.cost,
-          qty: item.qty,
-          productId: item.productId!,
-        ),
+      final itemPrice = item.isBroker ? item.price - item.cost : item.price;
+      final itemCost = item.isBroker ? 0.0 : item.cost;
+
+      final tsxItem = TransactionItem(
+        price: itemPrice,
+        cost: itemCost,
+        qty: item.qty,
+        productId: item.productId!,
       );
+
+      transactionItems.add(tsxItem);
     }
   }
 
