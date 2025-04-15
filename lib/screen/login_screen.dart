@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:produck_workshop/http/client.dart';
 import 'package:produck_workshop/prefs.dart';
+import 'package:produck_workshop/screen/start_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -51,6 +52,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
       await prefs.setString(prefsApi['API_TOKEN']!, token);
       authorizeDio(token);
+
+      if (context.mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) => startScreenGenerator(),
+          ),
+          ModalRoute.withName('/')
+        );
+      }
     } catch (error) {
       final snackBar = SnackBar(content: Text('Error: $error'));
       if (context.mounted) {

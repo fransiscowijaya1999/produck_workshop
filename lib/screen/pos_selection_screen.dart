@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:produck_workshop/model/pos.dart';
 import 'package:produck_workshop/prefs.dart';
+import 'package:produck_workshop/screen/start_screen.dart';
 import 'package:produck_workshop/services/pos.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -42,6 +43,15 @@ class _PosSelectionScreenState extends State<PosSelectionScreen> {
     setState(() {
       selectedId = pos.id;
     });
+
+    if (mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (BuildContext context) => startScreenGenerator(),
+        ),
+        ModalRoute.withName('/')
+      );
+    }
   }
 
   @override

@@ -38,7 +38,7 @@ Widget startScreenGenerator() {
             return StartScreen(message: 'Error: ${snapshot.error}');
           } else {
             if (snapshot.data!['API_URL']!.isEmpty) {
-              return const ApiSettingScreen();
+              return const ApiSettingScreen(isStart: true,);
             } else if (snapshot.data!['API_TOKEN']!.isEmpty) {
               return const LoginScreen();
             } else if (snapshot.data!['POS_ID']!.isEmpty) {

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:produck_workshop/http/client.dart';
 import 'package:produck_workshop/prefs.dart';
+import 'package:produck_workshop/screen/start_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiSettingScreen extends StatelessWidget {
-  const ApiSettingScreen({super.key});
+  const ApiSettingScreen({super.key, this.isStart = false});
+
+  final bool isStart;
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +36,10 @@ class ApiSettingScreen extends StatelessWidget {
                     if (snapshot.data != null) {
                       return ApiSettingForm(
                         apiUrl: snapshot.data!,
+                        isStart: isStart,
                       );
                     } else {
-                      return const ApiSettingForm();
+                      return const ApiSettingForm(isStart: false,);
                     }
                   }
               }
@@ -50,10 +54,12 @@ class ApiSettingScreen extends StatelessWidget {
 class ApiSettingForm extends StatefulWidget {
   const ApiSettingForm({
     super.key,
-    this.apiUrl = ''
+    this.apiUrl = '',
+    required this.isStart
   });
 
   final String apiUrl;
+  final bool isStart;
 
   @override
   State<ApiSettingForm> createState() => _ApiSettingFormState();
@@ -90,6 +96,17 @@ class _ApiSettingFormState extends State<ApiSettingForm> {
     setState(() {
       isSaving = false;
     });
+
+    if (widget.isStart) {
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) => startScreenGenerator(),
+          ),
+          ModalRoute.withName('/')
+        );
+      }
+    }
   }
 
   @override
