@@ -210,6 +210,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
                           orders: project.orders,
                           onSubmit: submitOrder,
                         ),
+                        SizedBox(height: 500)
                       ],
                     ),
                   ),
